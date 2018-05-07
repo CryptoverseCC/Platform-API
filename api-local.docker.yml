@@ -1,0 +1,22 @@
+version: '2'
+services:
+
+  ranking-worker-simple:
+    build: Apps/Ranking/Workers/Simple
+    environment:
+      - RDB_GRAPH=neo4j-readreplica.databases
+      - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
+    links:
+      - ranking-worker-queue:queue
+
+  ranking-worker-queue:
+    build: Apps/Ranking/Queue
+
+  ranking-server:
+    build: Apps/Ranking/Server
+    links:
+      - ranking-worker-queue:queue
+    ports:
+      - 8000:8000
+    environment:
+      - CORS_ALLOW_ALL=true

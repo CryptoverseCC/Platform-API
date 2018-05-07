@@ -1,0 +1,35 @@
+###############
+# Base Images #
+###############
+
+base-python-image:
+  build:
+    image: userfeeds/base-python-image
+    context: Apps/Base/Python
+    dockerfile: Dockerfile
+  cached: true
+
+###############
+# Ranking API #
+###############
+
+ranking-worker-simple:
+  build:
+    image: userfeeds/apps-ranking-runners-simple
+    context: Apps/Ranking/Workers/Simple
+    dockerfile: Dockerfile
+  cached: true
+
+ranking-worker-queue:
+  build:
+    image: userfeeds/apps-ranking-queue
+    context: Apps/Ranking/Queue
+    dockerfile: Dockerfile
+  cached: true
+
+ranking-server:
+  build:
+    image: userfeeds/apps-ranking-server
+    context: Apps/Ranking/Server
+    dockerfile: Dockerfile
+  cached: true

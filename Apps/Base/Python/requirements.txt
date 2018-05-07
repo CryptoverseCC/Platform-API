@@ -1,0 +1,6 @@
+Flask==0.12
+gunicorn
+requests
+pyzmq==15.4.0
+jsonschema
+logmatic-python

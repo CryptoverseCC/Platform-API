@@ -1,0 +1,5 @@
+version: '2'
+services:
+
+  ranking-worker-simple:
+    scale: 6
