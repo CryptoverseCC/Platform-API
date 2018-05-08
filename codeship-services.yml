@@ -19,6 +19,7 @@ ranking-worker-simple:
     context: Apps/Ranking/Workers/Simple
     dockerfile: Dockerfile
   cached: true
+  encrypted_env_file: env.encrypted
 
 ranking-worker-queue:
   build:

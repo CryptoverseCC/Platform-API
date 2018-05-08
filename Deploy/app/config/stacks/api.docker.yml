@@ -5,7 +5,6 @@ services:
     image: "userfeeds/apps-ranking-runners-simple:${CI_BRANCH}"
     environment:
       - RDB_GRAPH=graph_database
-      - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
     labels:
       io.rancher.container.pull_image: always
       io.rancher.scheduler.affinity:host_label: processing=true # TODO: (MG6) NOT PROCESSING
