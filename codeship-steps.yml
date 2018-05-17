@@ -13,9 +13,6 @@
   tag: '^\d+\.\d+\.\d+(-(alpha|beta|rc)\d*)?$'
   steps:
 
-    - service: decrypt-files
-      command: jet decrypt Deploy/app/config/environ.rapsy.json.encrypted Deploy/app/config/environ.rapsy.json
-
     - type: parallel
       steps:
 
@@ -60,5 +57,5 @@
       registry: https://index.docker.io/v1/
       encrypted_dockercfg_path: dockercfg.encrypted
 
-    - service: deploy
+    - service: userfeeds/deploy
       command: /app/deploy_api.sh rapsy
