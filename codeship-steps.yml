@@ -13,6 +13,9 @@
   tag: '^\d+\.\d+\.\d+(-(alpha|beta|rc)\d*)?$'
   steps:
 
+    - service: decrypt-files
+      command: jet decrypt Deploy/app/config/environ.rapsy.json.encrypted Deploy/app/config/environ.rapsy.json
+
     - type: parallel
       steps:
 
