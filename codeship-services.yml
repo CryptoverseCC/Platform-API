@@ -40,5 +40,4 @@ ranking-server:
 ##########
 
 deploy:
-  build:
-    image: userfeeds/deploy
+  image: userfeeds/deploy
