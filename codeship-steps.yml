@@ -57,6 +57,8 @@
       registry: https://index.docker.io/v1/
       encrypted_dockercfg_path: dockercfg.encrypted
 
-    - service: userfeeds/deploy
+    - service: deploy
+      image_name: userfeeds/deploy
       command: /app/deploy_api.sh rapsy
       encrypted_dockercfg_path: dockercfg.encrypted
+      registry: https://index.docker.io/v1/
