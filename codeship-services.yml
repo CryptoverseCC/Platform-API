@@ -34,3 +34,11 @@ ranking-server:
     context: Apps/Ranking/Server
     dockerfile: Dockerfile
   cached: true
+
+##########
+# Deploy #
+##########
+
+deploy:
+  build:
+    image: userfeeds/deploy
