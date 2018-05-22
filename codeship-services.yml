@@ -40,4 +40,4 @@ ranking-server:
 ##########
 
 deploy:
-  image: userfeeds/deploy
+  image: userfeeds/deploy:rapsy
