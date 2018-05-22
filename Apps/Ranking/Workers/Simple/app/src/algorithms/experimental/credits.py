@@ -1,6 +1,6 @@
 """
 Credits
-==========
+=======
 
 Returns list of credits value that were present in claim.credits along with number of time they were there. For a given `type` parameter
 
