@@ -59,3 +59,4 @@
 
     - service: deploy
       command: /app/deploy_api.sh rapsy
+      encrypted_dockercfg_path: dockercfg.encrypted
