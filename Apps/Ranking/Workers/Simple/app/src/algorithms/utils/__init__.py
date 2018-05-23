@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-
+from itertools import groupby
 
 PARAMS = {}
 
@@ -46,7 +46,7 @@ def filter_debug(fun):
     return inner
 
 
-def map_result_to_claims(query_result):
+def materialize_records(query_result):
     return [materialize_record(record) for record in query_result]
 
 
@@ -63,6 +63,14 @@ def normalize_to_list(raw_query_param):
         return raw_query_param
     else:
         return [raw_query_param]
+
+
+def group_by(items, key):
+    return group_by_function(items, lambda item: item[key])
+
+
+def group_by_function(items, key_function):
+    return {k: list(g) for k, g in groupby(items, key_function)}
 
 
 # Exceptions

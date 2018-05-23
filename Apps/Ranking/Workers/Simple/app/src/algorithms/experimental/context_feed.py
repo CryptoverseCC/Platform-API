@@ -20,7 +20,7 @@ Json claim example:
     }
 """
 
-from algorithms.utils import map_result_to_claims
+from algorithms.utils import materialize_records
 from algorithms.utils import param
 from algorithms.utils import sort_by_created_at
 
@@ -43,5 +43,5 @@ RETURN
 @param("id", required=True)
 def run(conn_mgr, input, **params):
     query_result = conn_mgr.run_graph(FIND_CLAIMS_IN_CONTEXT, params)
-    mapped_items = map_result_to_claims(query_result)
+    mapped_items = materialize_records(query_result)
     return {"items": sort_by_created_at(mapped_items)}

@@ -6,8 +6,11 @@ services:
     environment:
       - RDB_GRAPH=neo4j-readreplica.databases
       - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
+      - COMMAND=./launch_and_restart_on_changes.sh
     links:
       - ranking-worker-queue:queue
+    volumes:
+      - ./Apps/Ranking/Workers/Simple/app/src/algorithms:/app/src/algorithms
 
   ranking-worker-queue:
     build: Apps/Ranking/Queue

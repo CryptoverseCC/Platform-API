@@ -15,6 +15,7 @@ from collections import defaultdict
 
 from algorithms.utils import normalize_to_list
 from algorithms.utils import param
+from algorithms.utils import group_by
 
 SEND_TOKENS = """
 MATCH
@@ -76,11 +77,3 @@ def filter_owned_token(received_tokens, send_tokens, asset):
             del token_map[token]
     return [{"asset": asset, "token": token, "sequence": sequence, } for token, sequence in token_map.items()]
 
-
-def group_by(list, key):
-    result = {}
-    for item in list:
-        items_for_key = result.get(item[key], [])
-        items_for_key.append(item)
-        result[item[key]] = items_for_key
-    return result

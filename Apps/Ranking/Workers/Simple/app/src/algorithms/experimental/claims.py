@@ -39,7 +39,7 @@ JSON claim example:
     }
 """
 
-from algorithms.utils import map_result_to_claims
+from algorithms.utils import materialize_records
 from algorithms.utils import param
 from algorithms.utils import sort_by_created_at
 from algorithms.utils import normalize_to_list
@@ -80,7 +80,7 @@ def run(conn_mgr, input, **params):
         "targets": normalize_to_list(params.get("target")),
         "authors": normalize_to_list(params.get("author"))
     })
-    mapped_items = map_result_to_claims(query_result)
+    mapped_items = materialize_records(query_result)
     return {"items": sort_by_created_at(mapped_items)}
 
 

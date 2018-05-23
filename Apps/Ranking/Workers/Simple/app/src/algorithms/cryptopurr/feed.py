@@ -55,9 +55,9 @@ WITH
 OPTIONAL MATCH
     (claim)<-[:TARGET]-(targetClaim:Claim),
     (targetClaim)-[:IN]->(targetPackage:Package),
-    (targetClaim)<-[:AUTHORED]-(targetAuthor),
-    (targetClaim)-[:CONTEXT]->(targetContext)
-WHERE io.userfeeds.erc721.isValidClaim(targetClaim)
+    (targetClaim)<-[:AUTHORED]-(targetAuthor:Identity),
+    (targetClaim)-[:CONTEXT]->(targetContext:Entity)
+WHERE targetContext.id STARTS WITH {asset} AND io.userfeeds.erc721.isValidClaim(targetClaim)
 WITH
     claim,
     target,
@@ -76,7 +76,7 @@ OPTIONAL MATCH
     (target)<-[:AUTHORED]-(likeAuthor:Identity),
     (target)-[:CONTEXT]->(likeContext:Entity),
     (target)-[:TARGET]->(likeTarget:Entity)
-WHERE io.userfeeds.erc721.isValidClaim(target)
+WHERE likeContext.id STARTS WITH {asset} AND io.userfeeds.erc721.isValidClaim(target)
 OPTIONAL MATCH
     (target)-[:IN]->(likeInvalidPackage:Package),
     (target)<-[:AUTHORED]-(likeInvalidAuthor:Identity),

@@ -1,6 +1,6 @@
 """
-Filter claim hodl
-=================
+Filter by authors who received specific asset
+=============================================
 
 Version: 0.1.0
 
@@ -12,7 +12,7 @@ Any ERC20: `ethereum:0xe41d2489571d322189246dafa5ebde1f4699f498`
 
 Example:
 
-`ranking/experimental_claims;target=claim:0x49994...bf8e8:0/experimental_claim_hodl;asset=rinkeby <https://api.userfeeds.io/ranking/experimental_claims;target=claim:0x4999436ecf49984576651c7586dc95d4b59766e00c779cc2fdeade6ffc0bf8e8:0/experimental_claim_hodl;asset=rinkeby>`_
+`ranking/experimental_claims;target=claim:0x49994...bf8e8:0/experimental_filter_by_author_received_asset;asset=rinkeby <https://api-staging.userfeeds.io/ranking/experimental_claims;target=claim:0x4999436ecf49984576651c7586dc95d4b59766e00c779cc2fdeade6ffc0bf8e8:0/experimental_filter_by_author_received_asset;asset=rinkeby>`_
 
 """
 
