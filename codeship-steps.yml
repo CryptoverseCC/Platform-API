@@ -10,7 +10,7 @@
   # 2.34.6-rc1
   # 2.55.6-rc10
   # 2.89.6-rc23
-  tag: '^\d+\.\d+\.\d+(-(alpha|beta|rc|prod)\d*)?$'
+  tag: '^\d+\.\d+\.\d+(-(alpha|beta|rc|prod|all)\d*)?$'
   steps:
 
     - type: parallel
@@ -50,13 +50,13 @@
       steps:
 
         - service: deploy
-          tag: '^\d+\.\d+\.\d+-prod$'
+          tag: '^\d+\.\d+\.\d+-all$'
           command: /app/deploy_ranking.sh jazz
           registry: https://index.docker.io/v1/
           encrypted_dockercfg_path: dockercfg.encrypted
 
         - service: deploy
-          tag: '^\d+\.\d+\.\d+(-(alpha|beta|rc)\d*)?$'
-          command: /app/deploy_ranking.sh rapsy
+          tag: '^\d+\.\d+\.\d+-prod$'
+          command: /app/deploy_ranking_worker.sh jazz
           registry: https://index.docker.io/v1/
           encrypted_dockercfg_path: dockercfg.encrypted
