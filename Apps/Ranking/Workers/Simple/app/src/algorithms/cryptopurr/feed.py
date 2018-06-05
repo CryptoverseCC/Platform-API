@@ -39,10 +39,15 @@ STARTS_WITH_ASSET = "STARTS WITH {context})"
 EQUALS_CONTEXT = "= {context} OR (claim)-[:ABOUT]->(:Entity { id: {context} }))"
 FEED_QUERY = """
 MATCH
-    (target:Entity)<-[:TARGET]-(claim:Claim)-[:CONTEXT]->(context:Entity),
-    (claim)<-[:AUTHORED]-(author:Entity:Identity),
-    (claim)-[:IN]->(package:Entity:Package)
-WHERE (context.id %(context_filter)s AND io.userfeeds.erc721.isValidClaim(claim) %(id_filter)s
+    (claim:Claim)-[:IN]->(package:Entity:Package),
+    (claim)-[:CONTEXT]->(context:Entity)
+WHERE {until} > package.timestamp > {since} AND (context.id %(context_filter)s %(id_filter)s
+WITH claim, package, context
+WHERE io.userfeeds.erc721.isValidClaim(claim) 
+MATCH
+    (target:Entity)<-[:TARGET]-(claim),
+    (claim)<-[:AUTHORED]-(author:Entity:Identity)
+WITH target, claim, context, package, author
 OPTIONAL MATCH
     (claim)-[label:LABELS]->(target)
 WITH
@@ -324,6 +329,12 @@ def fetch_feed(conn_mgr, params):
     context = params["context"]
     query_params = {"context": context}
     query_options = {}
+    if "since" in params and "until" in params:
+        query_params["until"] = int(params["until"])
+        query_params["since"] = int(params["since"])
+    else:
+        query_params["until"] = 9223372036854775807
+        query_params["since"] = 0
     if context.count(':') == 2:
         asset, id = context.rsplit(":", 1)
         query_params["asset"] = asset
@@ -343,6 +354,8 @@ def sort_by_created_at(query_result):
     return sorted(query_result, key=lambda x: x["created_at"], reverse=True)
 
 
+@param("until", required=False)
+@param("since", required=False)
 @param("context", required=True)
 @param("id", required=False)
 def run(conn_mgr, input, **params):
