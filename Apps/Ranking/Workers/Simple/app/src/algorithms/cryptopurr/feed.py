@@ -357,6 +357,7 @@ def sort_by_created_at(query_result):
 @param("until", required=False)
 @param("since", required=False)
 @param("context", required=True)
+@param("full", required=False)
 @param("id", required=False)
 def run(conn_mgr, input, **params):
     feed = fetch_feed(conn_mgr, params)
@@ -366,7 +367,9 @@ def run(conn_mgr, input, **params):
 
 def filter_feed(feed, params):
     context = params["context"]
-    if context.count(':') == 2 or "id" in params:
+    if "full" in params:
+        return feed
+    elif context.count(':') == 2 or "id" in params:
         return feed
     else:
         return [feed_item for feed_item in feed if not feed_item["like_target"]]
