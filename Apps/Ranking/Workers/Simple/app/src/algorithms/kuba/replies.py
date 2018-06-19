@@ -12,19 +12,21 @@ REACTIONS = """
 UNWIND {ids} as id
 MATCH (claim:Claim { id: id })
 OPTIONAL MATCH
-    (claim)<-[:ABOUT]-(replyClaim:Claim),
-    (replyClaim)<-[:AUTHORED]-(replyAuthor:Identity),
-    (replyClaim)-[:IN]->(replyPackage:Package)
+    (claim)<-[:ABOUT]-(replyClaim),
+    (replyClaim)-[:TARGET]->(replyTarget),
+    (replyClaim)<-[:AUTHORED]-(replyAuthor),
+    (replyClaim)-[:IN]->(replyPackage)
 WITH id, replyClaim, replyAuthor, replyPackage,
     CASE replyClaim
         WHEN null THEN false
         ELSE io.userfeeds.erc721.isValidClaim(replyClaim) END AS erc721ValidClaim
 OPTIONAL MATCH
-    (replyClaim)-[:CONTEXT]->(replyContext:Entity)
+    (replyClaim)-[:CONTEXT]->(replyContext)
 WHERE erc721ValidClaim
 RETURN
     id,
     collect(replyClaim.id) as reply_id,
+    collect(replyTarget.id) as reply_target,
     collect(replyAuthor.id) AS reply_author,
     collect(replyPackage.family) AS reply_family,
     collect(replyPackage.sequence) AS reply_sequence,
@@ -47,13 +49,14 @@ def run(conn_mgr, input, **ignore):
 
 def create_reply_list(r):
     reply_contexts = iter(r["reply_context"])
-    return [create_reply(id, author, family, sequence, created_at, next(reply_contexts) if context_exists else None)
-            for id, author, family, sequence, created_at, context_exists in zip_reply_info(r)]
+    return [create_reply(id, target, author, family, sequence, created_at, next(reply_contexts) if context_exists else None)
+            for id, target, author, family, sequence, created_at, context_exists in zip_reply_info(r)]
 
 
 def zip_reply_info(r):
     return zip(
         r["reply_id"],
+        r["reply_target"],
         r["reply_author"],
         r["reply_family"],
         r["reply_sequence"],
@@ -61,9 +64,10 @@ def zip_reply_info(r):
         r["reply_context_exists"])
 
 
-def create_reply(id, author, family, sequence, created_at, context):
+def create_reply(id, target, author, family, sequence, created_at, context):
     return {
         "id": id,
+        "target": { "id": target },
         "author": author,
         "family": family,
         "sequence": sequence,
