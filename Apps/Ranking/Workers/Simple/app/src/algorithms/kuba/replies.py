@@ -16,7 +16,7 @@ OPTIONAL MATCH
     (replyClaim)-[:TARGET]->(replyTarget),
     (replyClaim)<-[:AUTHORED]-(replyAuthor),
     (replyClaim)-[:IN]->(replyPackage)
-WITH id, replyClaim, replyAuthor, replyPackage,
+WITH id, replyClaim, replyTarget, replyAuthor, replyPackage,
     CASE replyClaim
         WHEN null THEN false
         ELSE io.userfeeds.erc721.isValidClaim(replyClaim) END AS erc721ValidClaim
