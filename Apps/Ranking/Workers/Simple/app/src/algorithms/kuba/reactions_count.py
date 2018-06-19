@@ -10,8 +10,8 @@ from algorithms.utils import pipeable, filter_debug
 
 REACTIONS_COUNT = """
 UNWIND {ids} as id
-MATCH (c:Claim { id: id })
-OPTIONAL MATCH (c)<-[:TARGET]-(reaction:Claim)
+MATCH (claim:Claim { id: id })
+OPTIONAL MATCH (claim)<-[:TARGET]-(reaction:Claim)
 RETURN id, count(reaction) as count
 """
 
