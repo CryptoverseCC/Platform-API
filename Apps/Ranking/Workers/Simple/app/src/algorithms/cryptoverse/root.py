@@ -53,7 +53,7 @@ def map_feed(feed):
 def map_feed_item(feed_item):
     return {
         "id": feed_item["id"],
-        "target": { "id": feed_item["target"] },
+        "target": feed_item["target"],
         "author": feed_item["author"],
         "family": feed_item["family"],
         "sequence": feed_item["sequence"],

@@ -67,7 +67,7 @@ def zip_reply_info(r):
 def create_reply(id, target, author, family, sequence, created_at, context):
     return {
         "id": id,
-        "target": { "id": target },
+        "target": target,
         "author": author,
         "family": family,
         "sequence": sequence,
