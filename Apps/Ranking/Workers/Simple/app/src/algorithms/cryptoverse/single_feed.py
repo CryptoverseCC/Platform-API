@@ -1,24 +1,24 @@
 """
-Cryptoverse feed with replies and likes
-=======================================
+Cryptoverse single feed with replies and likes
+==============================================
 
 Version: 0.1.0
 
 Example:
 
-`ranking/cryptoverse_feed <https://api.userfeeds.io/ranking/cryptoverse_feed>`_
+`ranking/cryptoverse_single_feed;id=ethereum:0x06012...a266d:341605 <https://api.userfeeds.io/ranking/cryptoverse_single_feed;id=ethereum:0x06012c8cf97bead5deae237070f9587f8e7a266d:341605>`_
 
 """
 
 import re
-from algorithms.cryptoverse import root
+from algorithms.cryptoverse import single
 from algorithms.kuba import replies, reactions
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 
 
 def run(conn_mgr, input, **params):
-    result = root.run(conn_mgr, input, **params)
+    result = single.run(conn_mgr, input, **params)
     result = replies.run(conn_mgr, result)
     result = reactions.run(conn_mgr, result)
     set_types(result["items"])
