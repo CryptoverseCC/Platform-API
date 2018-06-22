@@ -15,8 +15,11 @@ Example:
 from algorithms.utils import param
 
 SINGLE_QUERY = """
-MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} })
-WHERE io.userfeeds.erc721.isValidClaim(claim) AND NOT /*like*/ (claim)-[:TARGET]->(:Claim) AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
+MATCH (claim:Claim)-[:CONTEXT]->(context:Entity)
+WHERE (context.id = {id} OR (claim)-[:ABOUT]->(:Entity { id: {id} }))
+    AND io.userfeeds.erc721.isValidClaim(claim)
+    AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
+    AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
 WITH claim, context
 MATCH
     (claim)-[:TARGET]->(target),
