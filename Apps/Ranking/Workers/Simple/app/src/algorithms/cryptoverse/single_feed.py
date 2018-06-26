@@ -27,12 +27,19 @@ def run(conn_mgr, input, **params):
 
 def set_types(items):
     for i in items:
-        if tokenPattern.match(i["target"]):
-            i["type"] = "follow"
-        elif i["about"]:
-            if tokenPattern.match(i["about"]):
-                i["type"] = "post_to"
-            else:
-                i["type"] = "post_about"
+        if not isinstance(i["target"], str):
+            i["type"] = "like"
+            set_type(i["target"])
         else:
-            i["type"] = "regular"
+            set_type(i)
+
+def set_type(i):
+    if tokenPattern.match(i["target"]):
+        i["type"] = "follow"
+    elif i["about"]:
+        if tokenPattern.match(i["about"]):
+            i["type"] = "post_to"
+        else:
+            i["type"] = "post_about"
+    else:
+        i["type"] = "regular"

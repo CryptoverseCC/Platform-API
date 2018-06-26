@@ -14,10 +14,9 @@ Example:
 
 from algorithms.utils import param
 
-SINGLE_QUERY = """
-MATCH (claim:Claim)-[:CONTEXT]->(context:Entity)
-WHERE (context.id = {id} OR (claim)-[:ABOUT]->(:Entity { id: {id} }))
-    AND io.userfeeds.erc721.isValidClaim(claim)
+CONTEXT_QUERY = """
+MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} })
+WHERE io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
     AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
 WITH claim, context
@@ -38,16 +37,73 @@ RETURN
 ORDER BY package.timestamp DESC
 """
 
+ABOUT_QUERY = """
+MATCH (claim:Claim)-[:ABOUT]->(about:Entity { id: {id} })
+WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim)
+WITH claim, about
+MATCH
+    (claim)-[:TARGET]->(target),
+    (claim)-[:IN]->(package),
+    (claim)<-[:AUTHORED]-(identity)
+OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
+WHERE io.userfeeds.erc721.isValidClaim(claim)
+RETURN
+    claim.id AS id,
+    target.id AS target,
+    package.family AS family,
+    package.sequence AS sequence,
+    package.timestamp AS created_at,
+    identity.id as author,
+    context.id as context,
+    about.id as about
+ORDER BY package.timestamp DESC
+"""
+
+REACTION_QUERY = """
+MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} }),
+    (claim)-[:TARGET]->(targetClaim:Claim)
+WHERE io.userfeeds.erc721.isValidClaim(claim)
+    AND NOT /*reply or anything weird*/ (claim)-[:ABOUT]->()
+WITH claim, context, targetClaim
+MATCH
+    (claim)-[:IN]->(package),
+    (claim)<-[:AUTHORED]-(identity),
+    (targetClaim)-[:TARGET]->(targetTarget),
+    (targetClaim)-[:IN]->(targetPackage),
+    (targetClaim)<-[:AUTHORED]-(targetIdentity)
+OPTIONAL MATCH (targetClaim)-[:ABOUT]->(targetAbout)
+WHERE NOT targetAbout:Claim
+OPTIONAL MATCH (targetClaim)-[:CONTEXT]->(targetContext)
+WHERE io.userfeeds.erc721.isValidClaim(targetClaim)
+RETURN
+    claim.id AS id,
+    targetClaim.id AS target_id,
+    targetTarget.id AS target_target,
+    targetPackage.family AS target_family,
+    targetPackage.sequence AS target_sequence,
+    targetPackage.timestamp AS target_created_at,
+    targetIdentity.id AS target_author,
+    targetContext.id AS target_context,
+    targetAbout.id AS target_about,
+    package.family AS family,
+    package.sequence AS sequence,
+    package.timestamp AS created_at,
+    identity.id AS author,
+    context.id AS context
+ORDER BY package.timestamp DESC
+"""
+
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    feed = fetch_feed(conn_mgr, params["id"])
-    mapped_feed = map_feed(feed)
-    return {"items": mapped_feed}
+    my = map_feed(fetch_feed(conn_mgr, CONTEXT_QUERY, params["id"]))
+    about_me = map_feed(fetch_feed(conn_mgr, ABOUT_QUERY, params["id"]))
+    my_likes = map_likes(fetch_feed(conn_mgr, REACTION_QUERY, params["id"]))
+    return {"items": sorted(my + about_me + my_likes, key=lambda x: x["created_at"], reverse=True)}
 
 
-def fetch_feed(conn_mgr, id):
-    return conn_mgr.run_graph(SINGLE_QUERY, {"id": id})
+def fetch_feed(conn_mgr, query, id):
+    return conn_mgr.run_graph(query, {"id": id})
 
 
 def map_feed(feed):
@@ -63,5 +119,30 @@ def map_feed_item(feed_item):
         "sequence": feed_item["sequence"],
         "created_at": feed_item["created_at"],
         "about": feed_item["about"],
+        "context": feed_item["context"],
+    }
+
+
+def map_likes(feed):
+    return [map_like_item(feed_item) for feed_item in feed]
+
+
+def map_like_item(feed_item):
+    return {
+        "id": feed_item["id"],
+        "target": {
+            "id": feed_item["target_id"],
+            "target": feed_item["target_target"],
+            "author": feed_item["target_author"],
+            "family": feed_item["target_family"],
+            "sequence": feed_item["target_sequence"],
+            "created_at": feed_item["target_created_at"],
+            "about": feed_item["target_about"],
+            "context": feed_item["target_context"],
+        },
+        "author": feed_item["author"],
+        "family": feed_item["family"],
+        "sequence": feed_item["sequence"],
+        "created_at": feed_item["created_at"],
         "context": feed_item["context"],
     }
