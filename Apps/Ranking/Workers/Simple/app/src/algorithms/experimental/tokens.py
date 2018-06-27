@@ -19,22 +19,22 @@ from algorithms.utils import group_by
 
 SEND_TOKENS = """
 MATCH
-	(identity:Identity { id: {identity} })<-[:SENDER]-(transfer:Transfer)-[:IN]->(package:Package)
-WHERE transfer.asset in { asset }
+	(identity:Identity { id: {identity} })<-[:SENDER]-(transfer:Transfer)-[:IN]->(package)
+WHERE transfer.asset IN {asset}
 RETURN
-    transfer.asset as asset,
-    transfer.amount as token,
-    package.sequence as sequence
+    transfer.asset AS asset,
+    transfer.amount AS token,
+    package.sequence AS sequence
 """
 
 RECEIVED_TOKEN = """
 MATCH
-	(identity:Identity { id: {identity} })<-[:RECEIVER]-(transfer:Transfer)-[:IN]->(package:Package)
-WHERE transfer.asset in { asset }
+	(identity:Identity { id: {identity} })<-[:RECEIVER]-(transfer:Transfer)-[:IN]->(package)
+WHERE transfer.asset IN {asset}
 RETURN
-    transfer.asset as asset,
-    transfer.amount as token,
-    package.sequence as sequence
+    transfer.asset AS asset,
+    transfer.amount AS token,
+    package.sequence AS sequence
 """
 
 
@@ -53,13 +53,13 @@ def run(conn_mgr, input, **params):
 
 
 def filter_owned_tokens(received_tokens, send_tokens):
-    tokens_to_send_tokens = group_by(send_tokens, 'asset')
-    tokens_to_received_tokens = group_by(received_tokens, 'asset')
+    assets_to_send_tokens = group_by(send_tokens, 'asset')
+    assets_to_received_tokens = group_by(received_tokens, 'asset')
     results = []
-    for token in tokens_to_received_tokens:
-        received_token = tokens_to_received_tokens.get(token, [])
-        send_token = tokens_to_send_tokens.get(token, [])
-        tokens_owned = filter_owned_token(received_token, send_token, token)
+    for asset in assets_to_received_tokens:
+        received_tokens = assets_to_received_tokens.get(asset, [])
+        send_tokens = assets_to_send_tokens.get(asset, [])
+        tokens_owned = filter_owned_token(received_tokens, send_tokens, asset)
         results.extend(tokens_owned)
     return results
 
@@ -75,5 +75,5 @@ def filter_owned_token(received_tokens, send_tokens, asset):
         sequence = send_token["sequence"]
         if sequence > token_map[token]:
             del token_map[token]
-    return [{"asset": asset, "token": token, "sequence": sequence, } for token, sequence in token_map.items()]
+    return [{"asset": asset, "token": token, "sequence": sequence} for token, sequence in token_map.items()]
 

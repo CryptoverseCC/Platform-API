@@ -92,6 +92,35 @@ class TestTokens(unittest.TestCase):
             "sequence": 1
         }])
 
+    def test_complex(self):
+        self.assertEqual(filter_owned_tokens([{
+            "asset": "0x0",
+            "token": "135",
+            "sequence": 5854986
+        }, {
+            "asset": "0x1",
+            "token": "6180",
+            "sequence": 5410744
+        }, {
+            "asset": "0x0",
+            "token": "593163",
+            "sequence": 5296837
+        }], [
+            # no sent tokens
+        ]), [{
+            "asset": "0x0",
+            "token": "135",
+            "sequence": 5854986
+        }, {
+            "asset": "0x0",
+            "token": "593163",
+            "sequence": 5296837
+        }, {
+            "asset": "0x1",
+            "token": "6180",
+            "sequence": 5410744
+        }])
+
 
 if __name__ == '__main__':
     unittest.main()
