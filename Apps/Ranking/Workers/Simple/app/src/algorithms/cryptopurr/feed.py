@@ -113,7 +113,7 @@ OPTIONAL MATCH
     (aboutClaim)<-[:AUTHORED]-(aboutAuthor),
     (aboutClaim)-[:CONTEXT]->(aboutContext),
     (aboutClaim)-[:TARGET]->(aboutTarget)
-WHERE io.userfeeds.erc721.isValidClaim(aboutClaim)
+WHERE aboutContext.id STARTS WITH {asset} AND io.userfeeds.erc721.isValidClaim(aboutClaim)
 RETURN
     claim.id as id,
     target.id as target,
