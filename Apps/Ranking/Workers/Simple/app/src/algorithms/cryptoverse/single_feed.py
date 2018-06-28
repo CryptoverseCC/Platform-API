@@ -13,6 +13,7 @@ Example:
 import re
 from algorithms.cryptoverse import single
 from algorithms.kuba import replies, reactions
+from algorithms.utils import param
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 

@@ -13,6 +13,7 @@ Example:
 import re
 from algorithms.cryptoverse import thread
 from algorithms.kuba import reactions
+from algorithms.utils import param
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 claimPattern = re.compile("claim:0x[0-9a-f]+(:\d+)?")
