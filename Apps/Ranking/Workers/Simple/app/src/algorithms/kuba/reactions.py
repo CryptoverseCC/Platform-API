@@ -78,5 +78,5 @@ def create_like(id, author, family, sequence, created_at, context):
 
 def add_likes(messages, reactions):
     for message in messages:
-        message["likes"] = reactions[message["id"]]
+        message["likes"] = sorted(reactions[message["id"]], key=lambda x: x["created_at"])
         add_likes(message.get("replies", []), reactions)

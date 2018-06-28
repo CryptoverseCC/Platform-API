@@ -78,4 +78,4 @@ def create_reply(id, target, author, family, sequence, created_at, context):
 
 def add_replies(root_messages, replies):
     for message in root_messages:
-        message["replies"] = replies[message["id"]]
+        message["replies"] = sorted(replies[message["id"]], key=lambda x: x["created_at"])
