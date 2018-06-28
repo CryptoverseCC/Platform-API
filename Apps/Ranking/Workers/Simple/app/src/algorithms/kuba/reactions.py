@@ -38,11 +38,15 @@ RETURN
 @filter_debug
 def run(conn_mgr, input, **ignore):
     root_messages = input["items"]
-    ids = [message["id"] for message in root_messages] + [reply["id"] for message in root_messages for reply in message["replies"]]
+    ids = all_ids(root_messages)
     reactions = conn_mgr.run_graph(REACTIONS, {"ids": ids})
     reactions = {r["id"]: create_like_list(r) for r in reactions}
     add_likes(root_messages, reactions)
     return input
+
+
+def all_ids(messages):
+    return [message["id"] for message in messages] + [id for message in messages for id in all_ids(message.get("replies", [])) ]
 
 
 def create_like_list(r):
@@ -72,8 +76,7 @@ def create_like(id, author, family, sequence, created_at, context):
     }
 
 
-def add_likes(root_messages, reactions):
-    for message in root_messages:
+def add_likes(messages, reactions):
+    for message in messages:
         message["likes"] = reactions[message["id"]]
-        for reply in message["replies"]:
-            reply["likes"] = reactions[reply["id"]]
+        add_likes(message.get("replies", []), reactions)
