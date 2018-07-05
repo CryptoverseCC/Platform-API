@@ -29,7 +29,7 @@ RETURN
 def run(conn_mgr, input, **params):
     params["ids"] = [x["id"] for x in input["items"]]
     results = conn_mgr.run_graph(VALUE_TRANSFER, params)
-    results = {r["id"]: sum([int(x) for x in r["boost_transfers"]]) + int(r["root_transfer"]) if r["root_transfer"] else 0 for r in results}
+    results = {r["id"]: sum([int(x) for x in r["boost_transfers"]]) + (int(r["root_transfer"]) if r["root_transfer"] else 0) for r in results}
     for i in input["items"]:
         i["score"] = results[i["id"]]
     return {
