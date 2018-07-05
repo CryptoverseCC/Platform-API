@@ -29,9 +29,18 @@ RETURN
 def run(conn_mgr, input, **params):
     params["ids"] = [x["id"] for x in input["items"]]
     results = conn_mgr.run_graph(VALUE_TRANSFER, params)
-    results = {r["id"]: sum([int(x) for x in r["boost_transfers"]]) + (int(r["root_transfer"]) if r["root_transfer"] else 0) for r in results}
+    results = {r["id"]: sum_transfers(r) for r in results}
     for i in input["items"]:
         i["score"] = results[i["id"]]
     return {
         "items": sorted(input["items"], key=lambda x: int(x["score"]), reverse=True)
     }
+
+
+def sum_transfers(r):
+    if r["root_transfer"]:
+        root_transfer = int(r["root_transfer"])
+    else:
+        root_transfer = 0
+    boost_transfers = sum([int(x) for x in r["boost_transfers"]])
+    return root_transfer + boost_transfers
