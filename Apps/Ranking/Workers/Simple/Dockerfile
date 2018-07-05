@@ -1,4 +1,4 @@
-FROM userfeeds/base-python-image
+FROM userfeeds/base-python-image:latest
 ENV COMMAND ./start.py
 
 RUN apk add --no-cache \

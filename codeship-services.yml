@@ -1,15 +1,4 @@
 ###############
-# Base Images #
-###############
-
-base-python-image:
-  build:
-    image: userfeeds/base-python-image
-    context: Apps/Base/Python
-    dockerfile: Dockerfile
-  cached: true
-
-###############
 # Ranking API #
 ###############
 
