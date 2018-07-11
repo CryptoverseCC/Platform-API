@@ -10,6 +10,7 @@ from algorithms.utils import materialize_records, sort_by_created_at
 
 LATEST_PURRERS = """
 MATCH (author)-[:AUTHORED]->(claim:Claim)-[:IN]->(package)
+WHERE package.timestamp > timestamp() - 604800000 // last week
 OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
 WHERE io.userfeeds.erc721.isValidClaim(claim)
 RETURN
