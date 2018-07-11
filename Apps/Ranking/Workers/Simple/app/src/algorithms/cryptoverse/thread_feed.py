@@ -35,6 +35,7 @@ def set_types(items):
         else:
             set_type(i)
 
+
 def set_type(i):
     if tokenPattern.match(i["target"]):
         i["type"] = "follow"
