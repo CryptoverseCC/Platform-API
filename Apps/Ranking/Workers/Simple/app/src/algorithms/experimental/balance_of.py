@@ -76,11 +76,11 @@ def balances_of(received_transfers, sent_transfers):
     for item in sent_transfers:
         identity, transfer_asset, transfer_amount = item["identity"], item["asset"], item["amount"]
         amount = balances.get((identity, transfer_asset), 0)
-        balances[(identity, transfer_asset)] = amount - int(transfer_amount)
+        balances[(identity, transfer_asset)] = amount - int(float(transfer_amount))
     for item in received_transfers:
         identity, transfer_asset, transfer_amount = item["identity"], item["asset"], item["amount"]
         amount = balances.get((identity, transfer_asset), 0)
-        balances[(identity, transfer_asset)] = amount + int(transfer_amount)
+        balances[(identity, transfer_asset)] = amount + int(float(transfer_amount))
 
     return [
         {
