@@ -35,7 +35,7 @@ def run(conn_mgr, input, **params):
     for i in input["items"]:
         if i["author"] in scores:
             i["score"] = scores[i["author"]]
-    with_score_only = filter(lambda x: "score" in x, input["items"])
+    with_score_only = filter(lambda x: x.get("score", 0) > 0, input["items"])
     sorted_by_score = sorted(with_score_only, key=lambda x: int(x["score"]), reverse=True)
     return {"items": sorted_by_score}
 
