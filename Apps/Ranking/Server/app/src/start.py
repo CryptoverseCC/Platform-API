@@ -75,13 +75,13 @@ def run(flow):
         response = json.loads(response)
 
         if isinstance(response, str):
-            logging.debug("Response for flow {} is an error.".format(pformat(flow)))
+            logging.info("Response for flow {} is an error.".format(pformat(flow)))
             logging.error(response)
             return jsonify(error=response), 400
 
         logging.debug("Sending response for flow: {}".format(pformat(flow)))
         return jsonify(response), 200
     except Exception as e:
-        logging.debug("Exception occurred while processing flow {}".format(pformat(flow)))
+        logging.info("Exception occurred while processing flow {}".format(pformat(flow)))
         logging.exception(e)
         return jsonify(error=str(e)), 400
