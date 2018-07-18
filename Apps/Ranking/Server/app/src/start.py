@@ -68,7 +68,7 @@ def run(flow):
     logging.debug("Sending request to workers with flow: {}".format(pformat(flow)))
     socket.send(json.dumps(flow).encode("utf8"))
     try:
-        logging.debug("Waiting for response from worker for flow: {}".format(pformat(flow)))
+        logging.info("Waiting for response from worker for flow: {}".format(pformat(flow)))
         response = socket.recv().decode("utf8")
 
         logging.debug("Got response from worker for flow: {}".format(pformat(flow)))
