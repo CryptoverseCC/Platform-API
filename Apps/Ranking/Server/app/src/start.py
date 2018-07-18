@@ -61,7 +61,7 @@ def run(flow):
     try:
         validate(flow, schema)
     except ValidationError as e:
-        logging.debug("Flow did not validate against schema")
+        logging.info("Flow did not validate against schema")
         logging.exception(e)
         return jsonify(error=str(e)), 400
 
@@ -79,7 +79,7 @@ def run(flow):
             logging.error(response)
             return jsonify(error=response), 400
 
-        logging.debug("Sending response for flow: {}".format(pformat(flow)))
+        logging.info("Sending response for flow: {}".format(pformat(flow)))
         return jsonify(response), 200
     except Exception as e:
         logging.info("Exception occurred while processing flow {}".format(pformat(flow)))
