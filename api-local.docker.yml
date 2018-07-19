@@ -4,8 +4,10 @@ services:
   ranking-worker-simple:
     build: Apps/Ranking/Workers/Simple
     environment:
-      - RDB_GRAPH=neo4j-readreplica.databases
+      - NEO4J_HOST=neo4j-readreplica.databases
       - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
+      - POSTGRES_AUTH=secretLogin/secretPassword
+      - POSTGRES_HOST=postgres.databases
       - COMMAND=./launch_and_restart_on_changes.sh
     links:
       - ranking-worker-queue:queue
