@@ -11,6 +11,8 @@ from uplatform import zmqconnect, logging
 from werkzeug.routing import BaseConverter
 import json
 import os
+import time
+import datetime
 
 
 class RegexConverter(BaseConverter):
@@ -56,6 +58,9 @@ def post():
 
 
 def run(flow):
+    flow['time_id'] = time.time()
+    flow['time_human'] = datetime.datetime.fromtimestamp(flow['time_id']).strftime('%Y-%m-%d %H:%M:%S')
+
     logging.info("Processing flow: {}".format(pformat(flow)))
 
     try:
