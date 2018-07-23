@@ -29,8 +29,7 @@
       steps:
 
         - service: deploy
-          tag: '^\d+\.\d+\.\d+-(\w)+$'
+          tag: '^\d+\.\d+\.\d+-\w+$'
           command: /app/deploy_by_tag_name.sh jazz
           registry: https://index.docker.io/v1/
           encrypted_dockercfg_path: dockercfg.encrypted
-
