@@ -33,7 +33,6 @@ class ConnectionManager:
         self.sql_conn = psycopg2.connect(host=POSTGRES_HOST, dbname="postgres", user="postgres")
         logging.info("Connected to PostgreSQL")
 
-
     def get_latest_package(self, family):
         family_url_map = {
             "ethereum": "http://ethereum-monitoring.monitoring:9987/latestBlockNumber",
@@ -49,6 +48,12 @@ class ConnectionManager:
     def run_graph(self, query, params):
         with self.graph_driver.session() as session:
             result = session.read_transaction(self.run_graph_query, query, params)
+        return result
+
+    def run_rdb(self, query, params):
+        with self.sql_conn.cursor() as session:
+            session.execute(query, params)
+            result = session.fetchall()
         return result
 
     @staticmethod
