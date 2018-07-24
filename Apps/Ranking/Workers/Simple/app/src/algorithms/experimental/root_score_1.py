@@ -47,5 +47,5 @@ def find_all_authors(items):
 
 def calc_score(item, scores):
     authors = find_all_authors([item])
-    item["score_abs"] = sum([scores[x] for x in authors])
+    item["score_abs"] = sum([scores[x] for x in authors]) + len(authors)
     item["score"] = item["score_abs"] * 100000 / (1 + time() - item["created_at"] / 1000)
