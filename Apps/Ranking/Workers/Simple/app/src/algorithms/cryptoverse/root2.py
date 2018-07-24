@@ -50,9 +50,9 @@ GROUP BY (claim.context, claim.timestamp, claim.author)
 
 
 def run(conn_mgr, input, **ignore):
-    feed = getFeed(conn_mgr)
-    received = getTransfers(conn_mgr, RECEIVED)
-    sent = getTransfers(conn_mgr, SENT)
+    feed = get_feed(conn_mgr)
+    received = get_transfers(conn_mgr, RECEIVED)
+    sent = get_transfers(conn_mgr, SENT)
 
     for x in feed:
         max_time_sent = get_max_timestamp_sent(sent, x)
@@ -74,13 +74,13 @@ def get_max_timestamp_sent(sent, x):
     return max_time_sent
 
 
-def getFeed(conn_mgr):
+def get_feed(conn_mgr):
     feed = fetch_feed(conn_mgr)
     mapped = [map_feed_item(feed_item) for feed_item in feed]
     return mapped
 
 
-def getTransfers(conn_mgr, query):
+def get_transfers(conn_mgr, query):
     sent_result = conn_mgr.run_rdb(query, ())
     sent = group_by_function([map_transfer_item(transfer_item) for transfer_item in sent_result],
                              lambda x2: create_cca_key(x2))
