@@ -12,6 +12,8 @@ Example:
 
 """
 
+from algorithms.utils import group_by_function
+
 ROOT_QUERY = """
 SELECT id, target, family, sequence, timestamp as created_at, author, context, about
 FROM persistent_claim claim
@@ -21,33 +23,80 @@ ORDER BY created_at DESC
 """
 
 RECEIVED = """
-select COALESCE(max(transfer.timestamp),0) from persistent_transfer transfer
-where transfer.asset = split_part(%(context)s, ':', 1) || ':' || split_part(%(context)s, ':', 2)
-and transfer.amount = split_part(%(context)s, ':', 3)
-and transfer.timestamp < %(created_at)s
-and transfer.receiver = %(author)s
+SELECT  claim.context, claim.timestamp as created_at, claim.author, COALESCE(max(transfer.timestamp),0) as max_timestamp
+FROM persistent_claim as claim
+INNER JOIN persistent_transfer as  transfer
+ON transfer.asset = split_part(claim.context, ':', 1) || ':' || split_part(claim.context, ':', 2)
+and transfer.amount = split_part(claim.context, ':', 3)
+and transfer.receiver = claim.author
+WHERE transfer.timestamp < claim.timestamp
+and ((claim.target not like 'claim:%%' OR claim.target is null)
+and (claim.about not like 'claim:%%' or claim.about is null))
+GROUP BY (claim.context, claim.timestamp, claim.author)
 """
 
 SENT = """
-select COALESCE(max(transfer.timestamp),0) from persistent_transfer transfer
-where transfer.asset = split_part(%(context)s, ':', 1) || ':' || split_part(%(context)s, ':', 2)
-and transfer.amount = split_part(%(context)s, ':', 3)
-and transfer.timestamp < %(created_at)s
-and transfer.senders = %(author)s
+SELECT  claim.context, claim.timestamp as created_at, claim.author, COALESCE(max(transfer.timestamp),0) as max_timestamp
+FROM persistent_claim as claim
+INNER JOIN persistent_transfer as transfer
+ON transfer.asset = split_part(claim.context, ':', 1) || ':' || split_part(claim.context, ':', 2)
+and transfer.amount = split_part(claim.context, ':', 3)
+and transfer.senders = claim.author
+WHERE transfer.timestamp < claim.timestamp
+and ((claim.target not like 'claim:%%' OR claim.target is null)
+and (claim.about not like 'claim:%%' or claim.about is null))
+GROUP BY (claim.context, claim.timestamp, claim.author)
 """
 
 
-def is_valid_erc721(conn_mgr, claim):
-    return conn_mgr.run_rdb(RECEIVED, claim) >= conn_mgr.run_rdb(SENT, claim)
-
-
 def run(conn_mgr, input, **ignore):
+    feed = getFeed(conn_mgr)
+    received = getTransfers(conn_mgr, RECEIVED)
+    sent = getTransfers(conn_mgr, SENT)
+
+    for x in feed:
+        max_time_sent = get_max_timestamp_sent(sent, x)
+        max_time_rec = get_max_timestamp_received(received, x)
+        if max_time_sent >= max_time_rec:
+            x["context"] = None
+    return {"items": feed}
+
+
+def get_max_timestamp_received(received, x):
+    max_rec = received.get(create_cca_key(x))
+    max_time_rec = max_timestamp_or_zero(max_rec)
+    return max_time_rec
+
+
+def get_max_timestamp_sent(sent, x):
+    max_sent = sent.get(create_cca_key(x))
+    max_time_sent = max_timestamp_or_zero(max_sent)
+    return max_time_sent
+
+
+def getFeed(conn_mgr):
     feed = fetch_feed(conn_mgr)
     mapped = [map_feed_item(feed_item) for feed_item in feed]
-    for x in mapped:
-        if not is_valid_erc721(conn_mgr, x):
-            del x["context"]
     return mapped
+
+
+def getTransfers(conn_mgr, query):
+    sent_result = conn_mgr.run_rdb(query, ())
+    sent = group_by_function([map_transfer_item(transfer_item) for transfer_item in sent_result],
+                             lambda x2: create_cca_key(x2))
+    return sent
+
+
+def create_cca_key(x):
+    return xstr(x["context"]) + xstr(x["created_at"]) + x["author"]
+
+
+def max_timestamp_or_zero(max_rec):
+    if not max_rec:
+        max_time_rec = 0
+    else:
+        max_time_rec = max_rec[0]["max_timestamp"]
+    return max_time_rec
 
 
 def fetch_feed(conn_mgr):
@@ -65,3 +114,18 @@ def map_feed_item(feed):
         "context": feed[6],
         "about": feed[7]
     }
+
+
+def map_transfer_item(transfer):
+    return {
+        "context": transfer[0],
+        "created_at": transfer[1],
+        "author": transfer[2],
+        "max_timestamp": transfer[3]
+    }
+
+
+def xstr(s):
+    if s is None:
+        return ''
+    return str(s)
