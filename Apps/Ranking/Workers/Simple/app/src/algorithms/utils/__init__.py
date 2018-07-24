@@ -17,7 +17,6 @@ def param(name, required=False):
         spec["params"][name] = required
         wrapper.spec = spec
         return wrapper
-
     return decorator
 
 
@@ -43,7 +42,6 @@ def filter_debug(fun):
         result = fun(*args, **kwargs)
         logging.debug(result)
         return result
-
     return inner
 
 
@@ -67,13 +65,9 @@ def normalize_to_list(raw_query_param):
 
 
 def group_by(items, key):
-    return group_by_function(items, lambda item: item[key])
-
-
-def group_by_function(items, function):
     ret = {}
     for i in items:
-        ret[function(i)] = ret.get(function(i), []) + [i]
+        ret[i[key]] = ret.get(i[key], []) + [i]
     return ret
 
 # Exceptions
