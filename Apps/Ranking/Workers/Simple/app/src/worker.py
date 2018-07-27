@@ -3,20 +3,8 @@ import json
 import logging
 import logging.config; logging.config.fileConfig('/app/logging.conf')
 
-import zmq
 from algorithms import handlers as algorithms
 from algorithms.utils import NotPipeableAlgorithm
-from db.managers import ConnectionManager
-
-logging.info("Ranking Worker - Start")
-
-logging.info("Connecting to message queue...")
-
-context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.connect("tcp://queue:6761")
-
-logging.info("Queue connection established")
 
 
 def run(conn_mgr, request):
@@ -57,22 +45,3 @@ def run(conn_mgr, request):
     if request['debug']:
         result['debug'] = steps
     return json.dumps(result).encode('utf8')
-
-
-# def listen(conn_mgr):
-#     logging.info("Waiting for requests...")
-#     while True:
-#         request = json.loads(socket.recv().decode("utf8"))
-#         logging.info("Got request: {}".format(request))
-#         reply = run(conn_mgr, request)
-#         logging.info("Sending response...")
-#         socket.send(reply)
-#         logging.info("Response sent")
-#
-#
-# if __name__ == "__main__":
-#     conn_mgr = ConnectionManager()
-#     try:
-#         listen(conn_mgr)
-#     finally:
-#         conn_mgr.close()
