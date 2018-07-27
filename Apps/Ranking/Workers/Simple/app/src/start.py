@@ -1,78 +1,95 @@
 #!/usr/bin/env python
-import json
-import logging
 import logging.config; logging.config.fileConfig('/app/logging.conf')
-
-import zmq
-from algorithms import handlers as algorithms
-from algorithms.utils import NotPipeableAlgorithm
+from flask import Flask, request
+from flask import jsonify
+from flask_cors import CORS
+from flows import path_to_flow, schema
+from jsonschema import validate, ValidationError
+from old import convert, InvalidAlgorithm
+from pprint import pformat
+from uplatform import zmqconnect, logging
+from werkzeug.routing import BaseConverter
+import json
+import os
+import worker
 from db.managers import ConnectionManager
 
-logging.info("Ranking Worker - Start")
 
-logging.info("Connecting to message queue...")
-
-context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.connect("tcp://queue:6761")
-
-logging.info("Queue connection established")
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
 
 
-def run(conn_mgr, request):
-    logging.info("Start processing request {}".format(request))
-    steps = []
-    result = {}
-    step_debug = {}
+app = Flask(__name__)
+app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
+app.url_map.converters['regex'] = RegexConverter
 
-    for step_number, step in enumerate(request["flow"]):
-        try:
-            algorithm = step["algorithm"]
-            params = step.get("params", {})
-            try:
-                algorithm_function = algorithms[algorithm]["run"]
-            except KeyError as e:
-                logging.exception(e)
-                result = "InvalidAlgorithmError: `{}` does not exist".format(algorithm)
-                return json.dumps(result).encode('utf8')
-
-            algorithm_specification = getattr(algorithm_function, 'spec', {})
-
-            if step_number > 0 and not algorithm_specification.get("pipeable"):
-                raise NotPipeableAlgorithm("Algorithm '{}' needs to be used as primary algorithm".format(algorithm))
-
-            step_debug = {
-                "algorithm": algorithm,
-                "params": params
-            }
-            result = algorithm_function(conn_mgr, result, **params)
-            logging.debug(result)
-        except Exception as e:
-            logging.exception(e)
-            result = str(e)
-            return json.dumps(result).encode('utf8')
-        finally:
-            step_debug["out"] = json.loads(json.dumps(result))
-            steps.append(step_debug)
-    if request['debug']:
-        result['debug'] = steps
-    return json.dumps(result).encode('utf8')
+if os.environ.get('CORS_ALLOW_ALL', False):
+    CORS(app)
 
 
-def listen(conn_mgr):
-    logging.info("Waiting for requests...")
-    while True:
-        request = json.loads(socket.recv().decode("utf8"))
-        logging.info("Got request: {}".format(request))
-        reply = run(conn_mgr, request)
-        logging.info("Sending response...")
-        socket.send(reply)
-        logging.info("Response sent")
-
-
-if __name__ == "__main__":
-    conn_mgr = ConnectionManager()
+@app.route('/<context>/<regex("[a-z]+"):backend>/', methods=['GET'])
+def _old(context, backend):
+    params = request.args.to_dict(flat=True)
     try:
-        listen(conn_mgr)
-    finally:
-        conn_mgr.close()
+        flow = convert(context, backend, params)
+    except InvalidAlgorithm:
+        return jsonify(error='Invalid Algorithm'), 400
+    flow['debug'] = 'debug' in params
+    return run(flow)
+
+
+@app.route('/<path:path>', methods=['GET'])
+def get(path):
+    params = request.args.to_dict(flat=True)
+    flow = path_to_flow(path)
+    flow['debug'] = 'debug' in params
+    return run(flow)
+
+
+@app.route('/', methods=['POST'])
+def post():
+    params = request.args.to_dict(flat=True)
+    flow = request.get_json()
+    flow['debug'] = 'debug' in params
+    return run(flow)
+
+
+def run(flow):
+    logging.info("Processing flow: {}".format(pformat(flow)))
+
+    try:
+        validate(flow, schema)
+    except ValidationError as e:
+        logging.info("Flow did not validate against schema")
+        logging.exception(e)
+        return jsonify(error=str(e)), 400
+
+    logging.debug("Sending request to workers with flow: {}".format(pformat(flow)))
+    # socket.send(json.dumps(flow).encode("utf8"))
+    try:
+        logging.info("Waiting for response from worker for flow: {}".format(pformat(flow)))
+        # response = socket.recv().decode("utf8")
+
+        logging.debug("Got response from worker for flow: {}".format(pformat(flow)))
+        # response = json.loads(response)
+
+        conn_mgr = ConnectionManager()
+        try:
+            response = worker.run(conn_mgr, flow)
+            response = json.loads(response)
+        finally:
+            conn_mgr.close()
+
+        if isinstance(response, str):
+            logging.info("Response for flow {} is an error.".format(pformat(flow)))
+            logging.error(response)
+            return jsonify(error=response), 400
+
+        logging.info("Sending response for flow: {}".format(pformat(flow)))
+        return jsonify(response), 200
+    except Exception as e:
+        logging.info("Exception occurred while processing flow {}".format(pformat(flow)))
+        logging.exception(e)
+        return jsonify(error=str(e)), 400

@@ -8,20 +8,9 @@ services:
       - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
       - POSTGRES_AUTH=secretLogin/secretPassword
       - POSTGRES_HOST=postgres.databases
+      - CORS_ALLOW_ALL=true
       - COMMAND=./launch_and_restart_on_changes.sh
-    links:
-      - ranking-worker-queue:queue
+    ports:
+    - 8000:8000
     volumes:
       - ./Apps/Ranking/Workers/Simple/app/src/algorithms:/app/src/algorithms
-
-  ranking-worker-queue:
-    build: Apps/Ranking/Queue
-
-  ranking-server:
-    build: Apps/Ranking/Server
-    links:
-      - ranking-worker-queue:queue
-    ports:
-      - 8000:8000
-    environment:
-      - CORS_ALLOW_ALL=true
