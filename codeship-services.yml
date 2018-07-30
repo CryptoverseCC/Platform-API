@@ -2,27 +2,13 @@
 # Ranking API #
 ###############
 
-ranking-worker-simple:
+ranking-worker:
   build:
-    image: userfeeds/apps-ranking-runners-simple
+    image: userfeeds/ranking-worker
     context: Apps/Ranking/Workers/Simple
     dockerfile: Dockerfile
   cached: true
   encrypted_env_file: env.encrypted
-
-ranking-worker-queue:
-  build:
-    image: userfeeds/apps-ranking-queue
-    context: Apps/Ranking/Queue
-    dockerfile: Dockerfile
-  cached: true
-
-ranking-server:
-  build:
-    image: userfeeds/apps-ranking-server
-    context: Apps/Ranking/Server
-    dockerfile: Dockerfile
-  cached: true
 
 ##########
 # Deploy #

@@ -1,10 +1,6 @@
 FROM userfeeds/base-python-image:latest
-ENV COMMAND ./start.py
 
-RUN apk add --no-cache \
-    python3-dev \
-    postgresql-dev \
-    bash
+RUN apk add --no-cache python3-dev postgresql-dev bash
 
 EXPOSE 8000
 
@@ -19,5 +15,4 @@ COPY app /app
 WORKDIR /app/src/
 RUN python3 tests
 
-CMD /usr/local/bin/gunicorn --log-config /app/logging.conf -w 8 -b :8000 start:app
-
+CMD /usr/local/bin/gunicorn --log-config /app/logging.conf -w 16 -b :8000 start:app

@@ -22,7 +22,7 @@ def run(conn_mgr, request):
             except KeyError as e:
                 logging.exception(e)
                 result = "InvalidAlgorithmError: `{}` does not exist".format(algorithm)
-                return json.dumps(result).encode('utf8')
+                return result
 
             algorithm_specification = getattr(algorithm_function, 'spec', {})
 
@@ -38,10 +38,10 @@ def run(conn_mgr, request):
         except Exception as e:
             logging.exception(e)
             result = str(e)
-            return json.dumps(result).encode('utf8')
+            return result
         finally:
             step_debug["out"] = json.loads(json.dumps(result))
             steps.append(step_debug)
     if request['debug']:
         result['debug'] = steps
-    return json.dumps(result).encode('utf8')
+    return result

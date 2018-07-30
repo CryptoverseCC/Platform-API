@@ -5,11 +5,8 @@ from flask import jsonify
 from flask_cors import CORS
 from flows import path_to_flow, schema
 from jsonschema import validate, ValidationError
-from old import convert, InvalidAlgorithm
 from pprint import pformat
-from uplatform import zmqconnect, logging
 from werkzeug.routing import BaseConverter
-import json
 import os
 import worker
 from db.managers import ConnectionManager
@@ -27,17 +24,6 @@ app.url_map.converters['regex'] = RegexConverter
 
 if os.environ.get('CORS_ALLOW_ALL', False):
     CORS(app)
-
-
-@app.route('/<context>/<regex("[a-z]+"):backend>/', methods=['GET'])
-def _old(context, backend):
-    params = request.args.to_dict(flat=True)
-    try:
-        flow = convert(context, backend, params)
-    except InvalidAlgorithm:
-        return jsonify(error='Invalid Algorithm'), 400
-    flow['debug'] = 'debug' in params
-    return run(flow)
 
 
 @app.route('/<path:path>', methods=['GET'])
@@ -66,19 +52,10 @@ def run(flow):
         logging.exception(e)
         return jsonify(error=str(e)), 400
 
-    logging.debug("Sending request to workers with flow: {}".format(pformat(flow)))
-    # socket.send(json.dumps(flow).encode("utf8"))
     try:
-        logging.info("Waiting for response from worker for flow: {}".format(pformat(flow)))
-        # response = socket.recv().decode("utf8")
-
-        logging.debug("Got response from worker for flow: {}".format(pformat(flow)))
-        # response = json.loads(response)
-
         conn_mgr = ConnectionManager()
         try:
             response = worker.run(conn_mgr, flow)
-            response = json.loads(response)
         finally:
             conn_mgr.close()
 

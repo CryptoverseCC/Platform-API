@@ -1,16 +1,12 @@
 version: '2'
 services:
 
-  ranking-worker-simple:
+  ranking-worker:
     build: Apps/Ranking/Workers/Simple
     environment:
       - NEO4J_HOST=neo4j-readreplica.databases
       - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
       - POSTGRES_AUTH=secretLogin/secretPassword
       - POSTGRES_HOST=postgres.databases
-      - CORS_ALLOW_ALL=true
-      - COMMAND=./launch_and_restart_on_changes.sh
     ports:
-    - 8000:8000
-    volumes:
-      - ./Apps/Ranking/Workers/Simple/app/src/algorithms:/app/src/algorithms
+      - 8000:8000
