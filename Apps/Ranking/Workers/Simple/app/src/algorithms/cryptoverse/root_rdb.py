@@ -14,19 +14,8 @@ Example:
 
 ROOT_QUERY = """
 SELECT DISTINCT claim.id, claim.target, claim.family, claim.sequence, claim.timestamp AS created_at, claim.author, claim.context, claim.about,
-COALESCE(MAX(transfer.timestamp) OVER (PARTITION BY (claim.context, claim.timestamp, claim.target)) ,0) AS max_received,
-COALESCE(MAX(transfer2.timestamp) OVER (PARTITION BY (claim.context, claim.timestamp, claim.target)),0) AS max_sent
+is_valid_erc721_context(claim.author, SPLIT_PART(claim.context, ':', 1) || ':' || SPLIT_PART(claim.context, ':', 2),SPLIT_PART(claim.context, ':', 3),  claim.timestamp)
 FROM persistent_claim AS claim
- LEFT OUTER JOIN persistent_transfer AS transfer
- ON transfer.asset = SPLIT_PART(claim.context, ':', 1) || ':' || SPLIT_PART(claim.context, ':', 2)
- AND transfer.amount = SPLIT_PART(claim.context, ':', 3)
- AND  claim.author = transfer.receiver
- AND transfer.timestamp < claim.timestamp
-LEFT OUTER JOIN persistent_transfer as transfer2
- ON transfer2.asset = SPLIT_PART(claim.context, ':', 1) || ':' || SPLIT_PART(claim.context, ':', 2)
- AND transfer2.amount = SPLIT_PART(claim.context, ':', 3)
- AND  claim.author = transfer2.senders
- AND transfer2.timestamp < claim.timestamp
  WHERE (claim.target NOT LIKE 'claim:%%' OR claim.target IS NULL)
  AND (claim.about NOT LIKE 'claim:%%' OR claim.about IS NULL)
  ORDER BY created_at DESC
@@ -37,12 +26,10 @@ def run(conn_mgr, input, **ignore):
     feed = get_feed(conn_mgr)
 
     for x in feed:
-        max_time_sent = x["max_sent"]
-        max_time_rec = x["max_received"]
-        if max_time_sent >= max_time_rec:
+        is_valid_context = x["is_valid_erc721_context"]
+        if not is_valid_context:
             x["context"] = None
-        del x["max_received"]
-        del x["max_sent"]
+            del x["is_valid_erc721_context"]
     return {"items": feed}
 
 
@@ -66,6 +53,5 @@ def map_feed_item(feed):
         "author": feed[5],
         "context": feed[6],
         "about": feed[7],
-        "max_received" : feed[8],
-        "max_sent": feed[9]
+        "is_valid_erc721_context" : feed[8]
     }
