@@ -8,7 +8,6 @@ from algorithms.utils import NotPipeableAlgorithm
 
 
 def run(conn_mgr, request):
-    logging.info("Start processing request {}".format(request))
     steps = []
     result = {}
     step_debug = {}

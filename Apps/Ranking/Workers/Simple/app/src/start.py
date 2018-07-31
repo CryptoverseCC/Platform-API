@@ -5,7 +5,6 @@ from flask import jsonify
 from flask_cors import CORS
 from flows import path_to_flow, schema
 from jsonschema import validate, ValidationError
-from pprint import pformat
 import os
 import worker
 from db.managers import ConnectionManager
@@ -36,7 +35,7 @@ def post():
 
 
 def run(flow):
-    logging.info("Processing flow: {}".format(pformat(flow)))
+    logging.info("Processing flow: {}".format(flow))
 
     try:
         validate(flow, schema)
@@ -49,13 +48,13 @@ def run(flow):
         response = worker.run(conn_mgr, flow)
 
         if isinstance(response, str):
-            logging.info("Response for flow {} is an error.".format(pformat(flow)))
+            logging.info("Response for flow {} is an error.".format(flow))
             logging.error(response)
             return jsonify(error=response), 400
 
-        logging.info("Sending response for flow: {}".format(pformat(flow)))
+        logging.info("Sending response for flow: {}".format(flow))
         return jsonify(response), 200
     except Exception as e:
-        logging.info("Exception occurred while processing flow {}".format(pformat(flow)))
+        logging.info("Exception occurred while processing flow {}".format(flow))
         logging.exception(e)
         return jsonify(error=str(e)), 400
