@@ -7,6 +7,8 @@ import requests
 from neo4j.v1 import GraphDatabase, basic_auth
 from retry import retry
 import psycopg2
+from psycopg2.extras import DictCursor
+from algorithms.utils import materialize_records
 
 DB_GRAPH_USER, DB_GRAPH_PASS = os.environ["NEO4J_AUTH"].split('/')
 NEO_HOST = os.environ["NEO4J_HOST"]
@@ -51,10 +53,16 @@ class ConnectionManager:
         return result
 
     def run_rdb(self, query, params):
-        with self.sql_conn.cursor() as session:
-            session.execute(query, params)
-            result = session.fetchall()
-        return result
+        with self.sql_conn.cursor(cursor_factory=DictCursor) as cursor:
+            cursor.execute(query, params)
+            result = cursor.fetchall()
+        return materialize_records(result)
+
+    def create_record(obj, fields):
+        ''' given obj from db returns namedtuple with fields mapped to values '''
+        Record = namedtuple("Record", fields)
+        mappings = dict(zip(fields, obj))
+        return Record(**mappings)
 
     @staticmethod
     def run_graph_query(tx, query, params):
