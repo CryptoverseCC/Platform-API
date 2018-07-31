@@ -58,12 +58,6 @@ class ConnectionManager:
             result = cursor.fetchall()
         return materialize_records(result)
 
-    def create_record(obj, fields):
-        ''' given obj from db returns namedtuple with fields mapped to values '''
-        Record = namedtuple("Record", fields)
-        mappings = dict(zip(fields, obj))
-        return Record(**mappings)
-
     @staticmethod
     def run_graph_query(tx, query, params):
         return tx.run(query, params)
