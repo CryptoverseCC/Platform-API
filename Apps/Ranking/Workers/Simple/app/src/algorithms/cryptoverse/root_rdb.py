@@ -24,10 +24,8 @@ FROM persistent_claim AS claim
 
 def run(conn_mgr, input, **ignore):
     feed = fetch_feed(conn_mgr)
-
     for x in feed:
-        is_valid_context = x["is_valid_erc721_context"]
-        if not is_valid_context:
+        if not x["is_valid_erc721_context"]:
             x["context"] = None
             del x["is_valid_erc721_context"]
     return {"items": feed}
