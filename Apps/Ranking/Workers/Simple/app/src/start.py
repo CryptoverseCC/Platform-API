@@ -6,21 +6,14 @@ from flask_cors import CORS
 from flows import path_to_flow, schema
 from jsonschema import validate, ValidationError
 from pprint import pformat
-from werkzeug.routing import BaseConverter
 import os
 import worker
 from db.managers import ConnectionManager
 
 
-class RegexConverter(BaseConverter):
-    def __init__(self, url_map, *items):
-        super(RegexConverter, self).__init__(url_map)
-        self.regex = items[0]
-
-
 app = Flask(__name__)
 app.config["JSONIFY_PRETTYPRINT_REGULAR"] = False
-app.url_map.converters['regex'] = RegexConverter
+conn_mgr = ConnectionManager()
 
 if os.environ.get('CORS_ALLOW_ALL', False):
     CORS(app)
@@ -53,11 +46,7 @@ def run(flow):
         return jsonify(error=str(e)), 400
 
     try:
-        conn_mgr = ConnectionManager()
-        try:
-            response = worker.run(conn_mgr, flow)
-        finally:
-            conn_mgr.close()
+        response = worker.run(conn_mgr, flow)
 
         if isinstance(response, str):
             logging.info("Response for flow {} is an error.".format(pformat(flow)))
