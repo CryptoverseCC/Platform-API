@@ -15,9 +15,9 @@ Example:
 from algorithms.utils import param
 
 ROOT_QUERY = """
-MATCH (claim:Claim)-[:ABOUT]->(about:Entity { id: {id} })
+MATCH (claim:Claim)-[:ABOUT]->(:Entity { id: {id} })
 WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim)
-WITH claim, about
+WITH claim
 MATCH
     (claim)-[:TARGET]->(target),
     (claim)-[:IN]->(package),
@@ -31,8 +31,7 @@ RETURN
     package.sequence AS sequence,
     package.timestamp AS created_at,
     identity.id as author,
-    context.id as context,
-    about.id as about
+    context.id as context
 ORDER BY package.timestamp DESC
 """
 
@@ -60,6 +59,5 @@ def map_feed_item(feed_item):
         "family": feed_item["family"],
         "sequence": feed_item["sequence"],
         "created_at": feed_item["created_at"],
-        "about": feed_item["about"],
         "context": feed_item["context"],
     }

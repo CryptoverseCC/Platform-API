@@ -15,8 +15,9 @@ from algorithms.cryptoverse import thread
 from algorithms.kuba import reactions
 from algorithms.utils import param
 
-tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 claimPattern = re.compile("claim:0x[0-9a-f]+(:\d+)?")
+tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
+assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}")
 
 
 @param("id", required=True)
@@ -40,10 +41,12 @@ def set_type(i):
     if tokenPattern.match(i["target"]):
         i["type"] = "follow"
     elif i["about"]:
-        if tokenPattern.match(i["about"]):
-            i["type"] = "post_to"
-        elif claimPattern.match(i["about"]):
+        if claimPattern.match(i["about"]):
             i["type"] = "response"
+        elif tokenPattern.match(i["about"]):
+            i["type"] = "post_to"
+        elif assetPattern.match(i["about"]):
+            i["type"] = "post_club"
         else:
             i["type"] = "post_about"
     else:

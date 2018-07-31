@@ -16,6 +16,7 @@ from algorithms.kuba import replies, reactions
 from algorithms.utils import param
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
+assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}")
 
 
 @param("id", required=True)
@@ -41,6 +42,8 @@ def set_type(i):
     elif i["about"]:
         if tokenPattern.match(i["about"]):
             i["type"] = "post_to"
+        elif assetPattern.match(i["about"]):
+            i["type"] = "post_club"
         else:
             i["type"] = "post_about"
     else:
