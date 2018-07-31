@@ -23,7 +23,7 @@ FROM persistent_claim AS claim
 
 
 def run(conn_mgr, input, **ignore):
-    feed = get_feed(conn_mgr)
+    feed = fetch_feed(conn_mgr)
 
     for x in feed:
         is_valid_context = x["is_valid_erc721_context"]
@@ -33,25 +33,5 @@ def run(conn_mgr, input, **ignore):
     return {"items": feed}
 
 
-def get_feed(conn_mgr):
-    feed = fetch_feed(conn_mgr)
-    mapped = [map_feed_item(feed_item) for feed_item in feed]
-    return mapped
-
-
 def fetch_feed(conn_mgr):
     return conn_mgr.run_rdb(ROOT_QUERY, ())
-
-
-def map_feed_item(feed):
-    return {
-        "id": feed[0],
-        "target": feed[1],
-        "family": feed[2],
-        "sequence": feed[3],
-        "created_at": feed[4],
-        "author": feed[5],
-        "context": feed[6],
-        "about": feed[7],
-        "is_valid_erc721_context" : feed[8]
-    }
