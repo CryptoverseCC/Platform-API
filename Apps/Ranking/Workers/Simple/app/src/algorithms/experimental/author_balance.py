@@ -35,8 +35,9 @@ def run(conn_mgr, input, **params):
     for i in input["items"]:
         if i["author"] in scores:
             i["score"] = scores[i["author"]]
-    with_score_only = filter(lambda x: x.get("score", 0) > 0, input["items"])
-    sorted_by_score = sorted(with_score_only, key=lambda x: int(x["score"]), reverse=True)
+    with_score_only = [x for x in input["items"] if x.get("score", 0) > 0]
+    sorted_by_score = sorted(with_score_only, key=lambda x: x["score"], reverse=True)
+    filter_likes_replies(sorted_by_score, scores)
     return {"items": sorted_by_score}
 
 
@@ -49,3 +50,18 @@ def find_all_authors(items):
         if i.get("replies"):
             authors.update(find_all_authors(i["replies"]))
     return authors
+
+
+def filter_likes_replies(items, scores):
+    for i in items:
+        if i.get("likes"):
+            for like in i["likes"]:
+                if like["author"] in scores:
+                    like["score"] = scores[like["author"]]
+            i["likes"] = [x for x in i["likes"] if x.get("score", 0) > 0]
+        if i.get("replies"):
+            for reply in i["replies"]:
+                if reply["author"] in scores:
+                    reply["score"] = scores[reply["author"]]
+            i["replies"] = [x for x in i["replies"] if x.get("score", 0) > 0]
+            filter_likes_replies(i["replies"], scores)
