@@ -25,20 +25,20 @@ def run(conn_mgr, input, **ignore):
     for x in replies:
         if not x["is_valid_erc721_context"]:
             x["context"] = None
-            del x["is_valid_erc721_context"]
+        del x["is_valid_erc721_context"]
     replies = group_by(replies, "about")
     add_replies(root_messages, replies)
-    return {"items": root_messages}
+    return input
 
 
 def add_replies(root_messages, replies):
     for message in root_messages:
-        message["replies"] = sorted_replies_or_none(message, replies)
+        message["replies"] = sorted_replies_or_empty(message, replies)
 
 
-def sorted_replies_or_none(message, replies):
+def sorted_replies_or_empty(message, replies):
     replay = replies.get(message["id"])
     if replay:
         return sorted(replay, key=lambda x: x["created_at"])
     else:
-        return None
+        return []

@@ -12,7 +12,7 @@ Example:
 
 import re
 from algorithms.cryptoverse import root_rdb
-from algorithms.kuba import replies_rdb, reactions
+from algorithms.kuba import replies_rdb, reactions_rdb
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 
@@ -20,6 +20,8 @@ tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 def run(conn_mgr, input, **params):
     result = root_rdb.run(conn_mgr, input, **params)
     result = replies_rdb.run(conn_mgr, result)
+    result = reactions_rdb.run(conn_mgr, result)
+    set_types(result["items"])
     return result
 
 
