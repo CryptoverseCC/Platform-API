@@ -27,7 +27,7 @@ def run(conn_mgr, input, **ignore):
     for x in feed:
         if not x["is_valid_erc721_context"]:
             x["context"] = None
-            del x["is_valid_erc721_context"]
+        del x["is_valid_erc721_context"]
     return {"items": feed}
 
 
