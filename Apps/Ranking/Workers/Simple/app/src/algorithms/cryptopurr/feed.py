@@ -291,7 +291,10 @@ def get_type(feed_item):
     if feed_item["abouted_invalid_id"]:
         return "response_invalid"
     if feed_item["abouted_entity"]:
-        return "post_to"
+        if feed_item["abouted_entity"].count(':') == 1:
+            return "post_club"
+        else:
+            return "post_to"
     if feed_item["abouted_something"]:
         return "post_about"
     if feed_item["labels"]:
