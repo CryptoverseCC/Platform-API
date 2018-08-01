@@ -13,12 +13,14 @@ from collections import defaultdict
 
 VALUE_BALANCE = """
 SELECT received.address as address, received.amount - COALESCE(send.amount, 0) as amount 
-              FROM (SELECT receiver as address, sum(cast(amount as decimal)) as amount from persistent_transfer where asset = 'ethereum:0xd26114cd6ee289accf82350c8d8487fedb8a0c07' and receiver in (SELECT * FROM UNNEST(%(addresses)s)) group by receiver) as received
-    left outer join (SELECT senders as address, sum(cast(amount as decimal)) as amount from persistent_transfer where asset = 'ethereum:0xd26114cd6ee289accf82350c8d8487fedb8a0c07' and senders in (SELECT * FROM UNNEST(%(addresses)s)) group by senders) as send
+              FROM (SELECT receiver as address, sum(cast(amount as decimal)) as amount from persistent_transfer where asset = %(_asset)s and receiver in (SELECT * FROM UNNEST(%(addresses)s)) group by receiver) as received
+    left outer join (SELECT senders as address, sum(cast(amount as decimal)) as amount from persistent_transfer where asset = %(_asset)s and senders in (SELECT * FROM UNNEST(%(addresses)s)) group by senders) as send
     on received.address = send.address;
 """
 
-supported_assets = "ethereum:0xd26114cd6ee289accf82350c8d8487fedb8a0c07"
+supported_assets = [
+    "ethereum:0xd26114cd6ee289accf82350c8d8487fedb8a0c07"
+]
 
 @pipeable
 @filter_debug
