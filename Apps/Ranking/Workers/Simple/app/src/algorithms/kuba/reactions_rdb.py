@@ -28,12 +28,19 @@ def run(conn_mgr, input, **ignore):
             x["context"] = None
         del x["is_valid_erc721_context"]
     reactions = group_by(reactions, "target")
+    remove_target(reactions)
     add_likes(root_messages, reactions)
     return input
 
 
 def all_ids(messages):
     return [message["id"] for message in messages] + [id for message in messages for id in all_ids(message.get("replies", [])) ]
+
+
+def remove_target(reactions):
+    for key, value in reactions.items():
+        for r in value:
+            del r["target"]
 
 
 def add_likes(messages, reactions):

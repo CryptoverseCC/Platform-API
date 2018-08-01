@@ -27,8 +27,15 @@ def run(conn_mgr, input, **ignore):
             x["context"] = None
         del x["is_valid_erc721_context"]
     replies = group_by(replies, "about")
+    remove_about(replies)
     add_replies(root_messages, replies)
     return input
+
+
+def remove_about(reactions):
+    for key, value in reactions.items():
+        for r in value:
+            del r["about"]
 
 
 def add_replies(root_messages, replies):
