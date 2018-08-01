@@ -46,4 +46,5 @@ def filter_sort_items(result):
                 "author": item["author"],
                 "context": item.get("context")
             }
-    return sorted(result_map.values(), key=lambda x: x["created_at"], reverse=True)
+    filtered = [x for x in result_map.values() if x["target"]]
+    return sorted(filtered, key=lambda x: x["created_at"], reverse=True)
