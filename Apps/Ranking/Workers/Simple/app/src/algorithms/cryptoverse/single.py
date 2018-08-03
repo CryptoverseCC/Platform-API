@@ -14,7 +14,7 @@ Example:
 
 from algorithms.utils import param
 
-CONTEXT_QUERY = """
+MY_EXPRESSIONS_QUERY = """
 MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} })
 WHERE io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
@@ -25,6 +25,7 @@ MATCH
     (claim)-[:IN]->(package),
     (claim)<-[:AUTHORED]-(identity)
 OPTIONAL MATCH (claim)-[:ABOUT]->(about)
+OPTIONAL MATCH (claim)-[labels:LABELS]->(target)
 RETURN
     claim.id AS id,
     target.id AS target,
@@ -33,11 +34,12 @@ RETURN
     package.timestamp AS created_at,
     identity.id as author,
     context.id as context,
-    about.id as about
+    about.id as about,
+    collect(labels.value) as labels
 ORDER BY package.timestamp DESC
 """
 
-ABOUT_QUERY = """
+EXPRESSIONS_ABOUT_ME_QUERY = """
 MATCH (claim:Claim)-[:ABOUT]->(about:Entity { id: {id} })
 WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim)
 WITH claim, about
@@ -59,7 +61,7 @@ RETURN
 ORDER BY package.timestamp DESC
 """
 
-REACTION_QUERY = """
+MY_REACTIONS_QUERY = """
 MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} }),
     (claim)-[:TARGET]->(targetClaim:Claim)
 WHERE io.userfeeds.erc721.isValidClaim(claim)
@@ -96,9 +98,9 @@ ORDER BY package.timestamp DESC
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    my = map_feed(fetch_feed(conn_mgr, CONTEXT_QUERY, params["id"]))
-    about_me = map_feed(fetch_feed(conn_mgr, ABOUT_QUERY, params["id"]))
-    my_likes = map_likes(fetch_feed(conn_mgr, REACTION_QUERY, params["id"]))
+    my = map_feed(fetch_feed(conn_mgr, MY_EXPRESSIONS_QUERY, params["id"]))
+    about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, params["id"]))
+    my_likes = map_likes(fetch_feed(conn_mgr, MY_REACTIONS_QUERY, params["id"]))
     return {"items": sorted(my + about_me + my_likes, key=lambda x: x["created_at"], reverse=True)}
 
 
@@ -120,6 +122,7 @@ def map_feed_item(feed_item):
         "created_at": feed_item["created_at"],
         "about": feed_item["about"],
         "context": feed_item["context"],
+        "label": feed_item["labels"][0] if feed_item.get("labels") else None,
     }
 
 

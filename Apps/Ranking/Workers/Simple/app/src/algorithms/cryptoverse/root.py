@@ -14,7 +14,7 @@ Example:
 
 ROOT_QUERY = """
 MATCH (claim:Claim)
-WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim) AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
+WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim) AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim) AND NOT /*labels*/ (claim)-[:LABELS]->()
 WITH claim
 MATCH
     (claim)-[:TARGET]->(target),
