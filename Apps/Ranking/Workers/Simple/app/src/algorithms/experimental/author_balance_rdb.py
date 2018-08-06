@@ -21,7 +21,7 @@ SELECT received.address as address, received.amount - COALESCE(send.amount, 0) a
 supported_assets = [
     "ethereum:0x0d8775f648430679a709e98d2b0cb6250d2887ef", #Basic Attention Token
     "ethereum:0xd26114cd6ee289accf82350c8d8487fedb8a0c07", #Omise Go
-    "ethereum:0xa74476443119A942dE498590Fe1f2454d7D4aC0d", #Golem
+    "ethereum:0xa74476443119a942de498590fe1f2454d7d4ac0d", #Golem
     "ethereum:0x744d70fdbe2ba4cf95131626614a1763df805b9e", #Status
     "ethereum:0xe41d2489571d322189246dafa5ebde1f4699f498", #ZRX
 ]
