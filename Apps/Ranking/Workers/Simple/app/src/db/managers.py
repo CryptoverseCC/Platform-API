@@ -53,10 +53,14 @@ class ConnectionManager:
         return result
 
     def run_rdb(self, query, params):
-        with self.sql_conn.cursor(cursor_factory=DictCursor) as cursor:
-            cursor.execute(query, params)
-            result = cursor.fetchall()
-        return materialize_records(result)
+        try:
+            with self.sql_conn.cursor(cursor_factory=DictCursor) as cursor:
+                cursor.execute(query, params)
+                result = cursor.fetchall()
+            return materialize_records(result)
+        except psycopg2.Error as e:
+            self.sql_conn.reset()
+            raise e
 
     @staticmethod
     def run_graph_query(tx, query, params):
