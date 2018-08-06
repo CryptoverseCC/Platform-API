@@ -31,6 +31,8 @@ supported_assets = [
 @param("asset", required=True)
 def run(conn_mgr, input, **params):
     authors = find_all_authors(input["items"])
+    if not authors:
+        return {"items": [] }
     results = conn_mgr.run_rdb(VALUE_BALANCE, {"_asset": params["asset"], "addresses": list(authors)})
     scores = defaultdict(int)
     for r in results:
