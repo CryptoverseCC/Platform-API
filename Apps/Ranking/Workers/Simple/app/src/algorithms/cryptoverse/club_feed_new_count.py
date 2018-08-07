@@ -6,20 +6,25 @@ Cryptoverse Club Feed New Messages Count
 from algorithms.utils import param
 
 ROOT_QUERY = """
-SELECT count(*) as count FROM persistent_claim where about = %(id)s and timestamp > %(version)s;
+UNWIND {ids} as id
+MATCH (p)<-[:IN]-(c:Claim)
+WHERE ((c)-[:ABOUT]->({id: id[0]}) or (c)-[:ABOUT]->(:Claim)-[:ABOUT]->({id: id[0]})) AND p.timestamp > id[1]
+RETURN id[0] as club_id, id[1] as version, count(c) as count
 """
 
 
 @param("versions", required=True)
 def run(conn_mgr, input, **params):
+    ids = [[id, version] for id, version in params["versions"].items()]
+    result = conn_mgr.run_graph(ROOT_QUERY, {"ids": ids})
     return {
-        "items": [count_new_for_id(conn_mgr, id, version) for id, version in params["versions"].items()],
+        "items": [map(item) for item in result],
     }
 
 
-def count_new_for_id(conn_mgr, id, version):
+def map(item):
     return {
-        "club_id": id,
-        "version": version,
-        "count": conn_mgr.run_rdb(ROOT_QUERY, {"id": id, "version": version})[0]["count"],
+        "club_id": item["club_id"],
+        "version": item["version"],
+        "count": item["count"],
     }
