@@ -74,3 +74,7 @@ def group_by(items, key):
 
 class NotPipeableAlgorithm(Exception):
     pass
+
+
+def create_asset(contract_mapping):
+    return contract_mapping.network + ":" + contract_mapping.address

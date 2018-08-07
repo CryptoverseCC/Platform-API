@@ -8,6 +8,10 @@ Adds balance of given author as score.
 
 """
 
+import jsonsempai
+with jsonsempai.imports():
+    import mapping
+from algorithms.utils import create_asset
 from algorithms.utils import param, pipeable, filter_debug
 from collections import defaultdict
 
@@ -19,12 +23,13 @@ SELECT received.address as address, received.amount - COALESCE(send.amount, 0) a
 """
 
 supported_assets = [
-    "ethereum:0x0d8775f648430679a709e98d2b0cb6250d2887ef", #Basic Attention Token
-    "ethereum:0xd26114cd6ee289accf82350c8d8487fedb8a0c07", #Omise Go
-    "ethereum:0xa74476443119a942de498590fe1f2454d7d4ac0d", #Golem
-    "ethereum:0x744d70fdbe2ba4cf95131626614a1763df805b9e", #Status
-    "ethereum:0xe41d2489571d322189246dafa5ebde1f4699f498", #ZRX
+    create_asset(mapping.BASIC_ATTENTION_TOKEN),
+    create_asset(mapping.OMNISE_GO),
+    create_asset(mapping.GOLEM),
+    create_asset(mapping.STATUS),
+    create_asset(mapping.ZRX),
 ]
+
 
 @pipeable
 @filter_debug
@@ -32,7 +37,7 @@ supported_assets = [
 def run(conn_mgr, input, **params):
     authors = find_all_authors(input["items"])
     if not authors:
-        return {"items": [] }
+        return {"items": []}
     results = conn_mgr.run_rdb(VALUE_BALANCE, {"_asset": params["asset"], "addresses": list(authors)})
     scores = defaultdict(int)
     for r in results:
