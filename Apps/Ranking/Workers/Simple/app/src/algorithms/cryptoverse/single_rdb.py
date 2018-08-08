@@ -20,11 +20,13 @@ from persistent_claim where context = %(id)s and is_valid_erc721_context(author,
 """
 EXPRESSIONS_ABOUT_ME_QUERY = """
 SELECT id, target, family, sequence, "timestamp" as created_at, author, context, about, labels
-from persistent_claim where about = %(id)s and is_valid_erc721_context(author,%(_asset)s,%(_amount)s, "timestamp")
+from persistent_claim where about = %(id)s 
+and is_valid_erc721_context(author,SPLIT_PART(context, ':', 1) || ':' || SPLIT_PART(context, ':', 2),SPLIT_PART(context, ':', 3), "timestamp")
 """
 LIKES_TARGETS = """
 SELECT id, target, family, sequence, "timestamp" as created_at, author, context, about, labels
-from persistent_claim where id in (SELECT * FROM UNNEST(%(ids)s)) and is_valid_erc721_context(author,SPLIT_PART(context, ':', 1) || ':' || SPLIT_PART(context, ':', 2),SPLIT_PART(context, ':', 3), "timestamp")
+from persistent_claim where id = ANY(%(ids)s) 
+and is_valid_erc721_context(author,SPLIT_PART(context, ':', 1) || ':' || SPLIT_PART(context, ':', 2),SPLIT_PART(context, ':', 3), "timestamp")
 """
 
 
