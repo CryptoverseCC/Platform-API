@@ -32,5 +32,5 @@ def run(conn_mgr, input, **params):
     results = conn_mgr.run_graph(ASSETS_BALANCES, params)
     balances = defaultdict(int)
     for r in results:
-        balances[r["asset"]] += int(r["amount"])
+        balances[r["asset"]] += int(float(r["amount"]))
     return {k: v for k, v in balances.items() if v > 0}
