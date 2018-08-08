@@ -31,7 +31,7 @@ def run(conn_mgr, input, **params):
     results = conn_mgr.run_graph(VALUE_BALANCE, params)
     scores = defaultdict(int)
     for r in results:
-        scores[r["address"]] += int(r["amount"])
+        scores[r["address"]] += int(float(r["amount"]))
     for i in input["items"]:
         if i["author"] in scores:
             i["score"] = scores[i["author"]]
