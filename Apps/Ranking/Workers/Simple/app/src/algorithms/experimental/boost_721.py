@@ -40,6 +40,7 @@ def boosts(conn_mgr, **params):
     return {
         "items": [{
             "id": e["id"],
+            "context": e["id"],
             "score": int(e["score"]),
         } for e in query_result if int(e["fee"]) * 11 >= int(e["score"])]
     }
