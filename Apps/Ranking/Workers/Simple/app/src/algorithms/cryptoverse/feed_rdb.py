@@ -16,6 +16,7 @@ from algorithms.kuba import replies_rdb, reactions_rdb
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}")
+addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 def run(conn_mgr, input, **params):
@@ -31,7 +32,7 @@ def set_types(items):
         if tokenPattern.match(i["target"]):
             i["type"] = "follow"
         elif i["about"]:
-            if tokenPattern.match(i["about"]):
+            if tokenPattern.match(i["about"]) or addressPattern.match(i["about"]):
                 i["type"] = "post_to"
             elif assetPattern.match(i["about"]):
                 i["type"] = "post_club"
