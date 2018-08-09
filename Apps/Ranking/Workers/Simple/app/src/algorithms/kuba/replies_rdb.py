@@ -10,8 +10,9 @@ from algorithms.utils import pipeable, filter_debug, group_by
 
 REACTIONS = """
 SELECT claim.id, claim.target, claim.author, claim.family, claim.sequence, claim.timestamp AS created_at, claim.context, claim.about,
-is_valid_erc721_context(claim.author, claim.context, claim.timestamp)
-FROM persistent_claim AS claim 
+case when valid.is_valid is null then is_valid_erc721_id(claim.id) else valid.is_valid end as is_valid_erc721_context
+FROM persistent_claim AS claim
+ LEFT OUTER JOIN persistent_claim_is_valid AS valid ON claim.id = valid.id
 WHERE claim.about IN (SELECT * FROM UNNEST(%(ids)s))
 ORDER BY claim."timestamp" DESC
 """

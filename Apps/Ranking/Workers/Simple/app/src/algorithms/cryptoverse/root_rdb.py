@@ -14,8 +14,9 @@ Example:
 
 ROOT_QUERY = """
 SELECT claim.id, claim.target, claim.family, claim.sequence, claim.timestamp AS created_at, claim.author, claim.context, claim.about,
-is_valid_erc721_context(claim.author, claim.context, claim.timestamp)
+case when valid.is_valid is null then is_valid_erc721_id(claim.id) else valid.is_valid end as is_valid_erc721_context
 FROM persistent_claim AS claim
+ LEFT OUTER JOIN persistent_claim_is_valid AS valid ON claim.id = valid.id
  WHERE (claim.target NOT LIKE 'claim:%%' OR claim.target IS NULL)
  AND (claim.about NOT LIKE 'claim:%%' OR claim.about IS NULL)
  ORDER BY created_at DESC
