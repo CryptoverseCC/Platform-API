@@ -12,6 +12,7 @@ Example:
 
 import re
 from algorithms.cryptoverse import single
+from algorithms.cryptoverse import single_address
 from algorithms.kuba import replies, reactions
 from algorithms.utils import param
 
@@ -22,7 +23,10 @@ addressPattern = re.compile("0x[0-9a-f]{40}")
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    result = single.run(conn_mgr, input, **params)
+    if addressPattern.match(params["id"]):
+        result = single_address.run(conn_mgr, input, **params)
+    else:
+        result = single.run(conn_mgr, input, **params)
     result = replies.run(conn_mgr, result)
     result = reactions.run(conn_mgr, result)
     set_types(result["items"])
