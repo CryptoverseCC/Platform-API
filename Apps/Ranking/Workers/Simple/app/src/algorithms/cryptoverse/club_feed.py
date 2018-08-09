@@ -16,6 +16,7 @@ from algorithms.kuba import replies, reactions
 from algorithms.utils import param
 
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
+addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 @param("id", required=True)
@@ -32,7 +33,7 @@ def set_types(items):
         if tokenPattern.match(i["target"]):
             i["type"] = "follow"
         elif i.get("about"):
-            if tokenPattern.match(i["about"]):
+            if tokenPattern.match(i["about"]) or addressPattern.match(i["about"]):
                 i["type"] = "post_to"
             else:
                 i["type"] = "post_about"
