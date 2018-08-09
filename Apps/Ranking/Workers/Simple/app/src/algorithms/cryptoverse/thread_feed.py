@@ -18,7 +18,6 @@ from algorithms.utils import param
 claimPattern = re.compile("claim:0x[0-9a-f]+(:\d+)?")
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
 assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}")
-addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 @param("id", required=True)
@@ -44,7 +43,7 @@ def set_type(i):
     elif i["about"]:
         if claimPattern.match(i["about"]):
             i["type"] = "response"
-        elif tokenPattern.match(i["about"]) or addressPattern.match(i["about"]):
+        elif tokenPattern.match(i["about"]):
             i["type"] = "post_to"
         elif assetPattern.match(i["about"]):
             i["type"] = "post_club"
