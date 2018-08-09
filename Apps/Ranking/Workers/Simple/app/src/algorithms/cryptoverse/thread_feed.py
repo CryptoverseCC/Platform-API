@@ -44,8 +44,10 @@ def set_type(i):
     elif i["about"]:
         if claimPattern.match(i["about"]):
             i["type"] = "response"
-        elif tokenPattern.match(i["about"]) or addressPattern.match(i["about"]):
+        elif tokenPattern.match(i["about"]):
             i["type"] = "post_to"
+        elif addressPattern.match(i["about"]):
+            i["type"] = "post_to_simple"
         elif assetPattern.match(i["about"]):
             i["type"] = "post_club"
         else:

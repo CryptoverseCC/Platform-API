@@ -33,8 +33,10 @@ def set_types(items):
         if tokenPattern.match(i["target"]):
             i["type"] = "follow"
         elif i.get("about"):
-            if tokenPattern.match(i["about"]) or addressPattern.match(i["about"]):
+            if tokenPattern.match(i["about"]):
                 i["type"] = "post_to"
+            elif addressPattern.match(i["about"]):
+                i["type"] = "post_to_simple"
             else:
                 i["type"] = "post_about"
         else:
