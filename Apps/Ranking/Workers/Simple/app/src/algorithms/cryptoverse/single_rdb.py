@@ -16,16 +16,16 @@ from algorithms.utils import param
 
 MY_EXPRESSIONS_QUERY = """
 SELECT id, target, family, sequence, "timestamp" as created_at, author, context, about, labels
-from persistent_claim where context = %(id)s and is_valid_erc721_asset_amount(author,%(_asset)s,%(_amount)s, "timestamp")
+from persistent_claim where context = %(id)s and is_valid_erc721_asset_amount(author, %(_asset)s, %(_amount)s, "timestamp")
 """
 EXPRESSIONS_ABOUT_ME_QUERY = """
 SELECT id, target, family, sequence, "timestamp" as created_at, author, context, about, labels
 from persistent_claim where about = %(id)s 
-and is_valid_erc721_asset_amount(author,SPLIT_PART(context, ':', 1) || ':' || SPLIT_PART(context, ':', 2),SPLIT_PART(context, ':', 3), "timestamp")
+and is_valid_erc721_context(author, context, "timestamp")
 """
 LIKES_TARGETS = """
 SELECT id, target, family, sequence, "timestamp" as created_at, author, 
-CASE WHEN is_valid_erc721_asset_amount(author,SPLIT_PART(context, ':', 1) || ':' || SPLIT_PART(context, ':', 2),SPLIT_PART(context, ':', 3), "timestamp") THEN context ELSE null END as context, 
+CASE WHEN is_valid_erc721_context(author, context, "timestamp") THEN context ELSE null END as context, 
 about, labels
 from persistent_claim where id = ANY(%(ids)s) 
 """

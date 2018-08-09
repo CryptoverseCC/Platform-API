@@ -14,7 +14,7 @@ Example:
 
 ROOT_QUERY = """
 SELECT claim.id, claim.target, claim.family, claim.sequence, claim.timestamp AS created_at, claim.author, claim.context, claim.about,
-is_valid_erc721_asset_amount(claim.author, SPLIT_PART(claim.context, ':', 1) || ':' || SPLIT_PART(claim.context, ':', 2),SPLIT_PART(claim.context, ':', 3),  claim.timestamp)
+is_valid_erc721_context(claim.author, claim.context, claim.timestamp)
 FROM persistent_claim AS claim
  WHERE (claim.target NOT LIKE 'claim:%%' OR claim.target IS NULL)
  AND (claim.about NOT LIKE 'claim:%%' OR claim.about IS NULL)
