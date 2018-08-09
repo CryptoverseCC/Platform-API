@@ -10,7 +10,7 @@ from algorithms.utils import pipeable, filter_debug, group_by
 
 REACTIONS = """
 SELECT claim.id, claim.target, claim.author, claim.family, claim.sequence, claim.timestamp AS created_at, claim.context,
-is_valid_erc721_context(claim.author, SPLIT_PART(claim.context, ':', 1) || ':' || SPLIT_PART(claim.context, ':', 2),SPLIT_PART(claim.context, ':', 3),  claim.timestamp)
+is_valid_erc721_asset_amount(claim.author, SPLIT_PART(claim.context, ':', 1) || ':' || SPLIT_PART(claim.context, ':', 2),SPLIT_PART(claim.context, ':', 3),  claim.timestamp)
 FROM persistent_claim AS claim 
 WHERE claim.target IN (SELECT * FROM UNNEST(%(ids)s))
 ORDER BY claim."timestamp" DESC
