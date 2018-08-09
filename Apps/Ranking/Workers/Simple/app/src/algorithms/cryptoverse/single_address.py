@@ -15,15 +15,14 @@ Example:
 from algorithms.utils import param
 
 MY_EXPRESSIONS_QUERY = """
-MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} })
-WHERE io.userfeeds.erc721.isValidClaim(claim)
+MATCH (claim:Claim)<-[:AUTHORED]-(identity:Identity { id: {id} })
+WHERE NOT io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
     AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
-WITH claim, context
+WITH claim, identity
 MATCH
     (claim)-[:TARGET]->(target),
-    (claim)-[:IN]->(package),
-    (claim)<-[:AUTHORED]-(identity)
+    (claim)-[:IN]->(package)
 OPTIONAL MATCH (claim)-[:ABOUT]->(about)
 OPTIONAL MATCH (claim)-[labels:LABELS]->(target)
 RETURN
@@ -33,7 +32,6 @@ RETURN
     package.sequence AS sequence,
     package.timestamp AS created_at,
     identity.id as author,
-    context.id as context,
     about.id as about,
     collect(labels.value) as labels
 """
@@ -60,14 +58,13 @@ RETURN
 """
 
 MY_REACTIONS_QUERY = """
-MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} }),
+MATCH (claim:Claim)<-[:AUTHORED]-(identity:Identity { id: {id} }),
     (claim)-[:TARGET]->(targetClaim:Claim)
-WHERE io.userfeeds.erc721.isValidClaim(claim)
+WHERE NOT io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*reply or anything weird*/ (claim)-[:ABOUT]->()
-WITH claim, context, targetClaim
+WITH claim, identity, targetClaim
 MATCH
     (claim)-[:IN]->(package),
-    (claim)<-[:AUTHORED]-(identity),
     (targetClaim)-[:TARGET]->(targetTarget),
     (targetClaim)-[:IN]->(targetPackage),
     (targetClaim)<-[:AUTHORED]-(targetIdentity)
@@ -88,8 +85,7 @@ RETURN
     package.family AS family,
     package.sequence AS sequence,
     package.timestamp AS created_at,
-    identity.id AS author,
-    context.id AS context
+    identity.id AS author
 """
 
 
@@ -118,7 +114,7 @@ def map_feed_item(feed_item):
         "sequence": feed_item["sequence"],
         "created_at": feed_item["created_at"],
         "about": feed_item["about"],
-        "context": feed_item["context"],
+        "context": feed_item.get("context"),
         "label": feed_item["labels"][0] if feed_item.get("labels") else None,
     }
 
@@ -144,5 +140,4 @@ def map_like_item(feed_item):
         "family": feed_item["family"],
         "sequence": feed_item["sequence"],
         "created_at": feed_item["created_at"],
-        "context": feed_item["context"],
     }
