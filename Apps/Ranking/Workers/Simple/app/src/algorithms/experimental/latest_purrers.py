@@ -6,21 +6,20 @@ Version: 0.1.0
 
 """
 
-from algorithms.utils import materialize_records, sort_by_created_at
+from algorithms.utils import sort_by_created_at
 
 LATEST_PURRERS = """
-MATCH (author)-[:AUTHORED]->(claim:Claim)-[:IN]->(package)
-WHERE package.timestamp > timestamp() - 604800000 // last week
-OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
-WHERE io.userfeeds.erc721.isValidClaim(claim)
-RETURN
-    author.id AS author,
-    context.id AS context,
-    max(package.timestamp) AS created_at
+SELECT a.author, a.context, max(a.created_at) as created_at from (
+   SELECT a.author as author,
+          case when b.is_valid is null and is_valid_erc721_id(a.id) then a.context when b.is_valid then a.context else null end as context,
+          a.timestamp AS created_at
+   FROM persistent_claim as a
+               LEFT OUTER JOIN persistent_claim_is_valid as b on a.id = b.id
+   WHERE TO_TIMESTAMP((a.timestamp + 604800000) / 1000) > now()
+) as a GROUP BY a.author, a.context
 """
 
 
 def run(conn_mgr, input, **params):
-    query_result = conn_mgr.run_graph(LATEST_PURRERS, params)
-    mapped_items = materialize_records(query_result)
-    return {"items": sort_by_created_at(mapped_items)}
+    query_result = conn_mgr.run_rdb(LATEST_PURRERS, {})
+    return {"items": sort_by_created_at(query_result)}
