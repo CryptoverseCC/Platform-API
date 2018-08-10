@@ -44,6 +44,8 @@ def set_types(items):
 def set_type(i):
     if tokenPattern.match(i["target"]):
         i["type"] = "follow"
+    elif addressPattern.match(i["target"]):
+        i["type"] = "follow_simple"
     elif i.get("label") in ["github", "twitter", "instagram", "facebook"]:
         i["type"] = "social"
     elif i["about"]:

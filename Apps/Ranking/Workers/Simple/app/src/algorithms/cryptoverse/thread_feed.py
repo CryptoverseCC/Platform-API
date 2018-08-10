@@ -41,6 +41,8 @@ def set_types(items):
 def set_type(i):
     if tokenPattern.match(i["target"]):
         i["type"] = "follow"
+    elif addressPattern.match(i["target"]):
+        i["type"] = "follow_simple"
     elif i["about"]:
         if claimPattern.match(i["about"]):
             i["type"] = "response"
