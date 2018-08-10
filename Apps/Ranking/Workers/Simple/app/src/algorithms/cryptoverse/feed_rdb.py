@@ -29,10 +29,8 @@ def run(conn_mgr, input, **params):
 
 def set_types(items):
     for i in items:
-        if tokenPattern.match(i["target"]):
-            i["type"] = "follow"
-        elif addressPattern.match(i["target"]):
-            i["type"] = "follow_simple"
+        if tokenPattern.match(i["target"]) or addressPattern.match(i["target"]):
+            i["type"] = "boost"
         elif i["about"]:
             if tokenPattern.match(i["about"]):
                 i["type"] = "post_to"
