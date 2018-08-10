@@ -14,6 +14,7 @@ You can check status of the API by calling `curl http://localhost:8000/status` f
 In order not to commit your credentials to repository we recommend to setup [git secrets](https://github.com/awslabs/git-secrets) with following configuration:
 
 ```
+git config core.hooksPath hooks &&
 git secrets --add "POSTGRES_AUTH=\w+/\w+" &&
 git secrets --add -a "POSTGRES_AUTH=secretLogin/secretPassword" &&
 git secrets --add "NEO4J_AUTH=\w+/\w+" &&
