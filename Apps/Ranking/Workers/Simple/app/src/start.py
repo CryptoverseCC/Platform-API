@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flows import path_to_flow, schema
 from jsonschema import validate, ValidationError
 import os
+import time
 import worker
 from db.managers import ConnectionManager
 
@@ -35,6 +36,7 @@ def post():
 
 
 def run(flow):
+    start_time = time.time()
     logging.info("Processing flow: {}".format(flow))
 
     try:
@@ -52,7 +54,7 @@ def run(flow):
             logging.error(response)
             return jsonify(error=response), 400
 
-        logging.info("Sending response for flow: {}".format(flow))
+        logging.info("Sending response after %.1fs for flow: %s" % (time.time() - start_time, flow))
         return jsonify(response), 200
     except Exception as e:
         logging.info("Exception occurred while processing flow {}".format(flow))
