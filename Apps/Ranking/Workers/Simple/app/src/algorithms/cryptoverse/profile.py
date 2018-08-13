@@ -27,7 +27,7 @@ from algorithms.experimental import context_feed, filter_labels, valid_erc721, s
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    input = context_feed.run(conn_mgr, input, id=params["context"])
+    input = context_feed.run(conn_mgr, input, id=params["id"])
     input = filter_labels.run(conn_mgr, input, id=["facebook", "instagram", "twitter", "github"])
     input = valid_erc721.run(conn_mgr, input)
     input = sort.run(conn_mgr, input, by="created_at")
