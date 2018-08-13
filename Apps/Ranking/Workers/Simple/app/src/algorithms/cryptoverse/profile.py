@@ -21,18 +21,34 @@ Json claim example:
     }
 """
 
-from algorithms.utils import param
+import re
 from algorithms.experimental import context_feed, filter_labels, valid_erc721, sort
+from algorithms.utils import param
+
+ADDRESS_PROFILE_QUERY = """
+MATCH (social:Entity)<-[l:LABELS]-(c:Claim)<-[:AUTHORED]-(:Identity { id: {identity} }), (c)-[:IN]->(p)
+WHERE l.value IN ['facebook', 'instagram', 'twitter', 'github'] AND NOT io.userfeeds.erc721.isValidClaim(c)
+RETURN social.id as social, l.value as label
+ORDER BY p.timestamp
+"""
+
+addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    input = context_feed.run(conn_mgr, input, id=params["id"])
-    input = filter_labels.run(conn_mgr, input, id=["facebook", "instagram", "twitter", "github"])
-    input = valid_erc721.run(conn_mgr, input)
-    input = sort.run(conn_mgr, input, by="created_at")
+    id = params["id"]
     output = {}
-    for claim in input["items"]:
-        for label in claim["labels"]:
-            output[label] = claim["target"]
+    if addressPattern.match(id):
+        input = conn_mgr.run_graph(ADDRESS_PROFILE_QUERY, {"identity": id})
+        for item in input:
+            output[item["label"]] = item["social"]
+    else:
+        input = context_feed.run(conn_mgr, input, id=id)
+        input = filter_labels.run(conn_mgr, input, id=["facebook", "instagram", "twitter", "github"])
+        input = valid_erc721.run(conn_mgr, input)
+        input = sort.run(conn_mgr, input, by="created_at")
+        for claim in input["items"]:
+            for label in claim["labels"]:
+                output[label] = claim["target"]
     return output
