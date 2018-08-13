@@ -32,7 +32,8 @@ class ConnectionManager:
     @retry(tries=5, delay=5)
     def connect_sql(self):
         logging.info("Connecting to PostgreSQL...")
-        self.sql_conn = psycopg2.connect(host=POSTGRES_HOST, dbname="postgres", user="postgres")
+        self.sql_conn = psycopg2.connect(host=POSTGRES_HOST, dbname="postgres", user=POSTGRES_USER,
+                                         password=POSTGRES_PASS)
         logging.info("Connected to PostgreSQL")
 
     def get_latest_package(self, family):
