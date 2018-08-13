@@ -12,7 +12,6 @@ from algorithms.utils import materialize_records
 
 DB_GRAPH_USER, DB_GRAPH_PASS = os.environ["NEO4J_AUTH"].split('/')
 NEO_HOST = os.environ["NEO4J_HOST"]
-POSTGRES_USER, POSTGRES_PASS = os.environ["POSTGRES_AUTH"].split('/')
 POSTGRES_HOST = os.environ["POSTGRES_HOST"]
 
 

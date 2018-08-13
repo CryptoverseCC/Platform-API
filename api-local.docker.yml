@@ -6,7 +6,6 @@ services:
     environment:
       - NEO4J_HOST=neo4j-readreplica.databases
       - NEO4J_AUTH=myneologin/myneopassword # TODO: (MG6) HIDE
-      - POSTGRES_AUTH=secretLogin/secretPassword
       - POSTGRES_HOST=postgres.databases
     ports:
       - 8000:8000
