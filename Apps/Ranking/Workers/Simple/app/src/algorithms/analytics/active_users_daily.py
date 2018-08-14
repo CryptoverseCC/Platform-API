@@ -8,7 +8,7 @@ from algorithms.utils import materialize_records
 QUERY = """
 MATCH (identity)-[:AUTHORED]->(c:Claim)-[:IN]->(p)
 RETURN count(DISTINCT identity) AS count, p.timestamp / (24 * 60 * 60 * 1000) AS id
-ORDER BY id DESC
+ORDER BY id ASC
 """
 
 
