@@ -4,7 +4,6 @@ import os
 
 CURRENT_DIR = os.path.dirname(__file__)
 
-logging.info(CURRENT_DIR)
 handlers = {}
 
 
@@ -23,7 +22,6 @@ def import_algo(module_name, path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     if hasattr(module, 'run'):
-        logging.info("%s: OK", module)
         run_func = getattr(module, "run")
         return {
             "run": run_func,
@@ -40,5 +38,3 @@ for path in algo_files():
         handlers[module_name] = import_algo(module_name, path)
     except Exception as e:
         logging.exception(e)
-
-logging.error(str(handlers))
