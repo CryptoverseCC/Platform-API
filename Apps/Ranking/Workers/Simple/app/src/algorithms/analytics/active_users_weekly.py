@@ -6,7 +6,7 @@ Analytics Active Users Weekly
 from algorithms.utils import materialize_records
 
 QUERY = """
-MATCH (identity)-[:AUTHORED]->(c:Claim)-[:IN]->(p)
+MATCH (identity)-[:AUTHORED]->(:Claim)-[:IN]->(p)
 RETURN count(DISTINCT identity) AS count, p.timestamp / (7 * 24 * 60 * 60 * 1000) AS id
 ORDER BY id ASC
 """

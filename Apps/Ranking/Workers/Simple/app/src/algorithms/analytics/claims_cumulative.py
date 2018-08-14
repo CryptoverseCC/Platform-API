@@ -4,8 +4,8 @@ Analytics Active Users Cumulative
 """
 
 QUERY = """
-MATCH (identity)-[:AUTHORED]->(:Claim)-[:IN]->(p)
-RETURN identity.id AS identity, min(p.timestamp) AS id
+MATCH (:Claim)-[:IN]->(p)
+RETURN p.timestamp AS id
 ORDER BY id ASC
 """
 
