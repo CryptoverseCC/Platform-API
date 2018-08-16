@@ -3,15 +3,10 @@ Cryptoverse thread root feed with likes
 =======================================
 """
 
-import re
+from algorithms.utils import claimPattern, tokenPattern, assetPattern, addressPattern
 from algorithms.cryptoverse import thread_root
 from algorithms.kuba import reactions
 from algorithms.utils import param
-
-claimPattern = re.compile("claim:0x[0-9a-f]+(:\d+)?")
-tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
-assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}")
-addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 @param("id", required=True)

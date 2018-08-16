@@ -10,13 +10,9 @@ Example:
 
 """
 
-import re
+from algorithms.utils import tokenPattern, assetPattern, addressPattern
 from algorithms.cryptoverse import root_rdb
 from algorithms.kuba import replies_rdb, reactions_rdb
-
-tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
-assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}")
-addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 def run(conn_mgr, input, **params):

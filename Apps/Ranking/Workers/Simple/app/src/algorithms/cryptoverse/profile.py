@@ -21,7 +21,7 @@ Json claim example:
     }
 """
 
-import re
+from algorithms.utils import addressPattern
 from algorithms.experimental import context_feed, filter_labels, valid_erc721, sort
 from algorithms.utils import param
 
@@ -31,8 +31,6 @@ WHERE l.value IN ['facebook', 'instagram', 'twitter', 'github'] AND NOT io.userf
 RETURN social.id as social, l.value as label
 ORDER BY p.timestamp
 """
-
-addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 @param("id", required=True)

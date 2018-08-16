@@ -5,8 +5,10 @@ from collections import defaultdict
 PARAMS = {}
 
 
+claimPattern = re.compile("claim:0x[0-9a-f]+(:\d+)?$")
 tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+$")
-addressPattern = re.compile("0x[0-9a-f]{40}")
+assetPattern = re.compile("[a-z]+:0x[0-9a-f]{40}$")
+addressPattern = re.compile("0x[0-9a-f]{40}$")
 
 def param(name, required=False):
     # Decorator for validation purposes

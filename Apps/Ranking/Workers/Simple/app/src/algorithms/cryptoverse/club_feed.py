@@ -10,13 +10,10 @@ Example:
 
 """
 
-import re
+from algorithms.utils import tokenPattern, addressPattern
 from algorithms.cryptoverse import club
 from algorithms.kuba import replies, reactions
 from algorithms.utils import param
-
-tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+")
-addressPattern = re.compile("0x[0-9a-f]{40}")
 
 
 @param("id", required=True)
