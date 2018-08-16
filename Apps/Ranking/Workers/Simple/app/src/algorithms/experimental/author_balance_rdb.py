@@ -30,6 +30,7 @@ supported_assets = [
     create_asset(mapping.ZRX),
     create_asset(mapping.DECENTRALAND_MANA),
     create_asset(mapping.CANDY),
+    create_asset(mapping.MAKER),
 ]
 
 
