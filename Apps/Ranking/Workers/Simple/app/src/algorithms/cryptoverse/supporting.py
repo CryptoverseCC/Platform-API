@@ -4,7 +4,8 @@ Supporting
 
 """
 
-import re
+from algorithms.utils import tokenPattern
+from algorithms.utils import addressPattern
 from algorithms.experimental import sort
 from algorithms.filter import group
 from algorithms.utils import param
@@ -26,9 +27,6 @@ RETURN
     owner_transfer.amount as score,
     fee_transfer.amount as fee
 """
-
-tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+$")
-addressPattern = re.compile("0x[0-9a-f]{40}")
 
 @param("fee_address", required=True)
 @param("entity", required=True)
@@ -52,6 +50,6 @@ def boosts(conn_mgr, **params):
 
 def remove_non_matching_ids(result):
     return  {
-        "items": [item for item in result["items"] if tokenPattern.match(item["id"])]
+        "items": [item for item in result["items"] if addressPattern.match(item["id"]) or tokenPattern.match(item["id"])]
     }
 

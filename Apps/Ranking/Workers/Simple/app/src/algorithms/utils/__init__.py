@@ -1,8 +1,12 @@
 import logging
+import re
 from collections import defaultdict
 
 PARAMS = {}
 
+
+tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+$")
+addressPattern = re.compile("0x[0-9a-f]{40}")
 
 def param(name, required=False):
     # Decorator for validation purposes
