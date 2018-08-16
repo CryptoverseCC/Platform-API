@@ -4,6 +4,7 @@ Boost
 
 """
 
+import re
 from algorithms.experimental import sort
 from algorithms.filter import group
 from algorithms.utils import param
@@ -26,11 +27,15 @@ RETURN
     fee_transfer.amount as fee
 """
 
+tokenPattern = re.compile("[a-z]+:0x[0-9a-f]{40}:\d+$")
+addressPattern = re.compile("0x[0-9a-f]{40}")
+
 @param("fee_address", required=True)
 @param("entity", required=True)
 @param("asset", required=True)
 def run(conn_mgr, input, **params):
     result = boosts(conn_mgr, **params)
+    result = remove_non_matching_ids(result)
     result = group.run(conn_mgr, result)
     result = sort.run(conn_mgr, result, by="score", order="desc")
     return result
@@ -43,4 +48,9 @@ def boosts(conn_mgr, **params):
             "context": e["id"],
             "score": int(e["score"]),
         } for e in query_result if int(e["fee"]) * 11 >= int(e["score"])]
+    }
+
+def remove_non_matching_ids(result):
+    return  {
+        "items": [item for item in result["items"] if tokenPattern.match(item["id"])]
     }
