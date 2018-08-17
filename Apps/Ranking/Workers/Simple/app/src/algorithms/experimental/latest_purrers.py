@@ -6,6 +6,7 @@ Version: 0.1.0
 
 """
 
+import time
 from algorithms.utils import sort_by_created_at
 
 LATEST_PURRERS = """
@@ -15,11 +16,12 @@ SELECT a.author, a.context, max(a.created_at) as created_at from (
           a.timestamp AS created_at
    FROM persistent_claim as a
                LEFT OUTER JOIN persistent_claim_is_valid as b on a.id = b.id
-   WHERE TO_TIMESTAMP((a.timestamp + 604800000) / 1000) > now()
+   WHERE a.timestamp > %(since)s
 ) as a GROUP BY a.author, a.context
 """
 
 
 def run(conn_mgr, input, **params):
-    query_result = conn_mgr.run_rdb(LATEST_PURRERS, {})
+    since = int(time.time() * 1000) - 604800000
+    query_result = conn_mgr.run_rdb(LATEST_PURRERS, {"since": since})
     return {"items": sort_by_created_at(query_result)}
