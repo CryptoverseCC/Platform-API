@@ -31,6 +31,10 @@ supported_assets = [
     create_asset(mapping.DECENTRALAND_MANA),
     create_asset(mapping.CANDY),
     create_asset(mapping.MAKER),
+    create_asset(mapping.BENTYN),
+    create_asset(mapping.DDGT),
+    create_asset(mapping.UNICORN),
+    create_asset(mapping.TOKENVILLE),
 ]
 
 
