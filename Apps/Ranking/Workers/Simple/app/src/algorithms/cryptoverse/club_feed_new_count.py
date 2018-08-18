@@ -6,10 +6,10 @@ Cryptoverse Club Feed New Messages Count
 from algorithms.utils import param
 
 ROOT_QUERY = """
-UNWIND {ids} as id
-MATCH (p)<-[:IN]-(c:Claim)
-WHERE ((c)-[:ABOUT]->({id: id[0]}) or (c)-[:ABOUT]->(:Claim)-[:ABOUT]->({id: id[0]})) AND p.timestamp > id[1]
-RETURN id[0] as club_id, id[1] as version, count(c) as count
+UNWIND {ids} AS id
+MATCH (p)<-[:IN]-(c:Claim)-[:ABOUT]->(:Entity { id: id[0] })
+WHERE p.timestamp > id[1]
+RETURN id[0] AS club_id, id[1] AS version, count(c) AS count
 """
 
 
