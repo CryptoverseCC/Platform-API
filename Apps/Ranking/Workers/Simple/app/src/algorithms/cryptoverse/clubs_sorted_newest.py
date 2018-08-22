@@ -6,7 +6,7 @@ Cryptoverse Clubs Sorted
 import jsonsempai
 with jsonsempai.imports():
     import mapping
-from algorithms.utils import materialize_records
+from algorithms.utils import materialize_records, param
 import re
 
 CLUBS_QUERY = """
@@ -17,8 +17,12 @@ ORDER BY score DESC
 """
 
 
+@param("clubs", required=False)
 def run(conn_mgr, input, **params):
-    clubs = [value.network + ":" + value.address for name, value in mapping.__dict__.items() if re.match("^[A-Z_]+$", name)]
+    if "clubs" in params:
+        clubs = params["clubs"]
+    else:
+        clubs = [value.network + ":" + value.address for name, value in mapping.__dict__.items() if re.match("^[A-Z_]+$", name)]
     result = conn_mgr.run_graph(CLUBS_QUERY, {"clubs": clubs})
     result = materialize_records(result)
     nonempty = [c["id"] for c in result]
