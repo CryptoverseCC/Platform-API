@@ -14,7 +14,7 @@ Example:
 
 ROOT_QUERY = """
 MATCH (claim:Claim)
-WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim) AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim) AND NOT /*labels*/ (claim)-[:LABELS]->()
+WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim) AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
 WITH claim
 MATCH
     (claim)-[:TARGET]->(target),
@@ -23,6 +23,7 @@ MATCH
 OPTIONAL MATCH (claim)-[:ABOUT]->(about)
 OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
 WHERE io.userfeeds.erc721.isValidClaim(claim)
+OPTIONAL MATCH (claim)-[labels:LABELS]->(target)
 RETURN
     claim.id AS id,
     target.id AS target,
@@ -31,7 +32,8 @@ RETURN
     package.timestamp AS created_at,
     identity.id as author,
     context.id as context,
-    about.id as about
+    about.id as about,
+    collect(labels.value) as labels
 ORDER BY package.timestamp DESC
 """
 
@@ -60,4 +62,5 @@ def map_feed_item(feed_item):
         "created_at": feed_item["created_at"],
         "about": feed_item["about"],
         "context": feed_item["context"],
+        "label": feed_item["labels"][0] if feed_item.get("labels") else None,
     }
