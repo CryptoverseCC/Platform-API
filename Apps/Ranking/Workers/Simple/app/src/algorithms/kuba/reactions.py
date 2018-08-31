@@ -6,7 +6,7 @@ Version: 0.1.0
 
 """
 
-from algorithms.utils import pipeable, filter_debug
+from algorithms.utils import pipeable, filter_debug, param
 
 REACTIONS = """
 UNWIND {ids} as id
@@ -15,6 +15,7 @@ OPTIONAL MATCH
     (claim)<-[:TARGET]-(reactionClaim:Claim),
     (reactionClaim)<-[:AUTHORED]-(reactionAuthor:Identity),
     (reactionClaim)-[:IN]->(reactionPackage:Package)
+WHERE NOT ({nocoiners} AND (replyAuthor)<-[:RECEIVER]-())
 WITH id, reactionClaim, reactionAuthor, reactionPackage,
     CASE reactionClaim
         WHEN null THEN false
@@ -36,10 +37,12 @@ RETURN
 
 @pipeable
 @filter_debug
-def run(conn_mgr, input, **ignore):
+@param("nocoiners", required=False)
+def run(conn_mgr, input, **params):
     root_messages = input["items"]
+    nocoiners = not not params.get("nocoiners")
     ids = all_ids(root_messages)
-    reactions = conn_mgr.run_graph(REACTIONS, {"ids": ids})
+    reactions = conn_mgr.run_graph(REACTIONS, {"ids": ids, "nocoiners": nocoiners})
     reactions = {r["id"]: create_like_list(r) for r in reactions}
     add_likes(root_messages, reactions)
     return input
