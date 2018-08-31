@@ -15,7 +15,7 @@ OPTIONAL MATCH
     (claim)<-[:TARGET]-(reactionClaim:Claim),
     (reactionClaim)<-[:AUTHORED]-(reactionAuthor:Identity),
     (reactionClaim)-[:IN]->(reactionPackage:Package)
-WHERE NOT ({nocoiners} AND (replyAuthor)<-[:RECEIVER]-())
+WHERE NOT ({nocoiners} AND (reactionAuthor)<-[:RECEIVER]-())
 WITH id, reactionClaim, reactionAuthor, reactionPackage,
     CASE reactionClaim
         WHEN null THEN false
