@@ -18,9 +18,9 @@ RETURN '-' + t.amount as amount, t.asset as asset
 
 
 @param("identity", required=True)
-@param("clubs", required=True)
+@param("asset", required=True)
 def run(conn_mgr, input, **params):
-    supported = set(params["clubs"])
+    supported = set(params["asset"])
     results = conn_mgr.run_graph(ALL_BALANCES, params)
     balances = defaultdict(int)
     for r in results:
