@@ -7,7 +7,7 @@ Cryptoverse Single Extended
 from algorithms.utils import param
 
 MY_EXPRESSIONS_QUERY = """
-MATCH (claim:Claim)<-[:AUTHORED]-(identity)
+MATCH (claim:Claim)<-[:AUTHORED]-(identity:Identity)
 WHERE identity.id IN {ids}
     AND NOT io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
@@ -29,7 +29,7 @@ RETURN
 """
 
 EXPRESSIONS_ABOUT_ME_QUERY = """
-MATCH (claim:Claim)-[:ABOUT]->(about)
+MATCH (claim:Claim)-[:ABOUT]->(about:Entity)
 WHERE about.id IN {ids} AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
 MATCH
     (claim)-[:TARGET]->(target),
@@ -49,7 +49,7 @@ RETURN
 """
 
 MY_REACTIONS_QUERY = """
-MATCH (claim:Claim)<-[:AUTHORED]-(identity),
+MATCH (claim:Claim)<-[:AUTHORED]-(identity:Identity),
     (claim)-[:TARGET]->(targetClaim:Claim)
 WHERE identity.id IN {ids}
     AND NOT io.userfeeds.erc721.isValidClaim(claim)

@@ -8,7 +8,7 @@ Allows to request multiple identities or tokens at once
 from algorithms.utils import param
 
 MY_EXPRESSIONS_QUERY = """
-MATCH (claim:Claim)-[:CONTEXT]->(context)
+MATCH (claim:Claim)-[:CONTEXT]->(context:Entity)
 WHERE context.id IN {ids}
     AND io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
@@ -32,7 +32,7 @@ RETURN
 """
 
 EXPRESSIONS_ABOUT_ME_QUERY = """
-MATCH (claim:Claim)-[:ABOUT]->(about)
+MATCH (claim:Claim)-[:ABOUT]->(about:Entity)
 WHERE about.id IN {ids} AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
 MATCH
     (claim)-[:TARGET]->(target),
@@ -52,7 +52,7 @@ RETURN
 """
 
 EXPRESSIONS_TARGETING_ME_QUERY = """
-MATCH (claim:Claim)-[:TARGET]->(target)
+MATCH (claim:Claim)-[:TARGET]->(target:Entity)
 WHERE target.id IN {ids} AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
 MATCH
     (claim)-[:IN]->(package),
@@ -72,7 +72,7 @@ RETURN
 """
 
 MY_REACTIONS_QUERY = """
-MATCH (claim:Claim)-[:CONTEXT]->(context),
+MATCH (claim:Claim)-[:CONTEXT]->(context:Entity),
     (claim)-[:TARGET]->(targetClaim:Claim)
 WHERE context.id IN {ids}
     AND io.userfeeds.erc721.isValidClaim(claim)
