@@ -82,7 +82,6 @@ MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} }),
     (claim)-[:TARGET]->(targetClaim:Claim)
 WHERE io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*reply or anything weird*/ (claim)-[:ABOUT]->()
-WITH claim, context, targetClaim
 MATCH
     (claim)-[:IN]->(package),
     (claim)<-[:AUTHORED]-(identity),
@@ -113,10 +112,11 @@ RETURN
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    my = map_feed(fetch_feed(conn_mgr, MY_EXPRESSIONS_QUERY, params["id"]))
-    about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, params["id"]))
-    targeting_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_TARGETING_ME_QUERY, params["id"]))
-    my_likes = map_likes(fetch_feed(conn_mgr, MY_REACTIONS_QUERY, params["id"]))
+    id = params["id"]
+    my = map_feed(fetch_feed(conn_mgr, MY_EXPRESSIONS_QUERY, id))
+    about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, id))
+    targeting_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_TARGETING_ME_QUERY, id))
+    my_likes = map_likes(fetch_feed(conn_mgr, MY_REACTIONS_QUERY, id))
     return {"items": sorted(my + about_me + targeting_me + my_likes, key=lambda x: x["created_at"], reverse=True)}
 
 
