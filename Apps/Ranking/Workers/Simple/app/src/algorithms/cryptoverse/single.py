@@ -19,7 +19,6 @@ MATCH (claim:Claim)-[:CONTEXT]->(context:Entity { id: {id} })
 WHERE io.userfeeds.erc721.isValidClaim(claim)
     AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
     AND NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
-WITH claim, context
 MATCH
     (claim)-[:TARGET]->(target),
     (claim)-[:IN]->(package),
@@ -41,11 +40,30 @@ RETURN
 EXPRESSIONS_ABOUT_ME_QUERY = """
 MATCH (claim:Claim)-[:ABOUT]->(about:Entity { id: {id} })
 WHERE NOT /*like*/ (claim)-[:TARGET]->(:Claim)
-WITH claim, about
 MATCH
     (claim)-[:TARGET]->(target),
     (claim)-[:IN]->(package),
     (claim)<-[:AUTHORED]-(identity)
+OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
+WHERE io.userfeeds.erc721.isValidClaim(claim)
+RETURN
+    claim.id AS id,
+    target.id AS target,
+    package.family AS family,
+    package.sequence AS sequence,
+    package.timestamp AS created_at,
+    identity.id as author,
+    context.id as context,
+    about.id as about
+"""
+
+EXPRESSIONS_TARGETING_ME_QUERY = """
+MATCH (claim:Claim)-[:TARGET]->(target:Entity { id: {id} })
+WHERE NOT /*reply*/ (claim)-[:ABOUT]->(:Claim)
+MATCH
+    (claim)-[:IN]->(package),
+    (claim)<-[:AUTHORED]-(identity)
+OPTIONAL MATCH (claim)-[:ABOUT]->(about)
 OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
 WHERE io.userfeeds.erc721.isValidClaim(claim)
 RETURN
@@ -97,8 +115,9 @@ RETURN
 def run(conn_mgr, input, **params):
     my = map_feed(fetch_feed(conn_mgr, MY_EXPRESSIONS_QUERY, params["id"]))
     about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, params["id"]))
+    targeting_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_TARGETING_ME_QUERY, params["id"]))
     my_likes = map_likes(fetch_feed(conn_mgr, MY_REACTIONS_QUERY, params["id"]))
-    return {"items": sorted(my + about_me + my_likes, key=lambda x: x["created_at"], reverse=True)}
+    return {"items": sorted(my + about_me + targeting_me + my_likes, key=lambda x: x["created_at"], reverse=True)}
 
 
 def fetch_feed(conn_mgr, query, id):
