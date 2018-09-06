@@ -85,11 +85,10 @@ def run(conn_mgr, input, **params):
     ids = params["id"]
     if isinstance(ids, str):
         ids = [ids]
-    my = map_feed(fetch_feed(conn_mgr, MY_EXPRESSIONS_QUERY, ids))
     about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, ids))
     targeting_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_TARGETING_ME_QUERY, ids))
-    my_likes = map_likes(fetch_feed(conn_mgr, MY_REACTIONS_QUERY, ids))
-    return {"items": my + about_me + targeting_me + my_likes}
+    my_likes = map_likes(fetch_feed(conn_mgr, REACTIONS_ABOUT_ME_QUERY, ids))
+    return {"items": about_me + targeting_me + my_likes}
 
 
 def fetch_feed(conn_mgr, query, ids):
