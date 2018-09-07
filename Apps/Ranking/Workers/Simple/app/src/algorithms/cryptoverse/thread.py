@@ -19,12 +19,19 @@ ROOT_QUERY = """
 MATCH
     (claim:Claim)
 WHERE claim.id IN {ids}
-WITH claim
 MATCH
     (claim)-[:TARGET]->(target),
     (claim)-[:IN]->(package),
     (claim)<-[:AUTHORED]-(identity)
 OPTIONAL MATCH (claim)-[:ABOUT]->(about)
+OPTIONAL MATCH
+    (about)-[:TARGET]->(aboutTarget),
+    (about)-[:IN]->(aboutPackage),
+    (about)<-[:AUTHORED]-(aboutIdentity)
+OPTIONAL MATCH (about)-[:ABOUT]->(aboutAbout)
+WHERE NOT aboutAbout:Claim
+OPTIONAL MATCH (about)-[:CONTEXT]->(aboutContext)
+WHERE io.userfeeds.erc721.isValidClaim(about)
 OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
 WHERE io.userfeeds.erc721.isValidClaim(claim)
 RETURN
@@ -35,7 +42,14 @@ RETURN
     package.timestamp AS created_at,
     identity.id as author,
     context.id as context,
-    about.id as about
+    about.id as about,
+    aboutTarget.id as about_target,
+    aboutPackage.family AS about_family,
+    aboutPackage.sequence AS about_sequence,
+    aboutPackage.timestamp AS about_created_at,
+    aboutIdentity.id AS about_author,
+    aboutContext.id AS about_context,
+    aboutAbout.id AS about_about
 """
 
 
@@ -59,6 +73,17 @@ def map_feed(feed):
 
 
 def map_feed_item(feed_item):
+    reply_to = None
+    if feed_item["about_target"]:
+        reply_to = {
+            "target": feed_item["about_target"],
+            "family": feed_item["about_family"],
+            "sequence": feed_item["about_sequence"],
+            "created_at": feed_item["about_created_at"],
+            "author": feed_item["about_author"],
+            "context": feed_item["about_context"],
+            "about": feed_item["about_about"],
+        }
     return {
         "id": feed_item["id"],
         "target": feed_item["target"],
@@ -68,6 +93,7 @@ def map_feed_item(feed_item):
         "created_at": feed_item["created_at"],
         "about": feed_item["about"],
         "context": feed_item["context"],
+        "reply_to": reply_to,
     }
 
 
