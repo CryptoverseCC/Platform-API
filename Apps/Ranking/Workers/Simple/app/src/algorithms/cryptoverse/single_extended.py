@@ -104,6 +104,41 @@ RETURN
     context.id AS context
 """
 
+MY_REPLIES_QUERY = """
+MATCH (claim:Claim)-[:CONTEXT]->(context:Entity),
+    (claim)-[:ABOUT]->(aboutClaim:Claim)
+WHERE context.id IN {ids}
+    AND io.userfeeds.erc721.isValidClaim(claim)
+    AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
+MATCH
+    (claim)-[:TARGET]->(target),
+    (claim)-[:IN]->(package),
+    (claim)<-[:AUTHORED]-(identity),
+    (aboutClaim)-[:TARGET]->(aboutTarget),
+    (aboutClaim)-[:IN]->(aboutPackage),
+    (aboutClaim)<-[:AUTHORED]-(aboutIdentity)
+OPTIONAL MATCH (aboutClaim)-[:ABOUT]->(aboutAbout)
+WHERE NOT aboutAbout:Claim
+OPTIONAL MATCH (aboutClaim)-[:CONTEXT]->(aboutContext)
+WHERE io.userfeeds.erc721.isValidClaim(aboutClaim)
+RETURN
+    claim.id AS id,
+    aboutClaim.id AS about_id,
+    aboutTarget.id AS about_target,
+    aboutPackage.family AS about_family,
+    aboutPackage.sequence AS about_sequence,
+    aboutPackage.timestamp AS about_created_at,
+    aboutIdentity.id AS about_author,
+    aboutContext.id AS about_context,
+    aboutAbout.id AS about_about,
+    target.id AS target,
+    package.family AS family,
+    package.sequence AS sequence,
+    package.timestamp AS created_at,
+    identity.id AS author,
+    context.id AS context
+"""
+
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
@@ -114,7 +149,8 @@ def run(conn_mgr, input, **params):
     about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, ids))
     targeting_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_TARGETING_ME_QUERY, ids))
     my_likes = map_likes(fetch_feed(conn_mgr, MY_REACTIONS_QUERY, ids))
-    return {"items": my + about_me + targeting_me + my_likes}
+    my_replies = map_replies(fetch_feed(conn_mgr, MY_REPLIES_QUERY, ids))
+    return {"items": my + about_me + targeting_me + my_likes + my_replies}
 
 
 def fetch_feed(conn_mgr, query, ids):
@@ -156,6 +192,32 @@ def map_like_item(feed_item):
             "about": feed_item["target_about"],
             "context": feed_item["target_context"],
         },
+        "author": feed_item["author"],
+        "family": feed_item["family"],
+        "sequence": feed_item["sequence"],
+        "created_at": feed_item["created_at"],
+        "context": feed_item["context"],
+    }
+
+
+def map_replies(feed):
+    return [map_reply_item(feed_item) for feed_item in feed]
+
+
+def map_reply_item(feed_item):
+    return {
+        "id": feed_item["id"],
+        "reply_to": {
+            "id": feed_item["about_id"],
+            "target": feed_item["about_target"],
+            "author": feed_item["about_author"],
+            "family": feed_item["about_family"],
+            "sequence": feed_item["about_sequence"],
+            "created_at": feed_item["about_created_at"],
+            "about": feed_item["about_about"],
+            "context": feed_item["about_context"],
+        },
+        "target": feed_item["target"],
         "author": feed_item["author"],
         "family": feed_item["family"],
         "sequence": feed_item["sequence"],

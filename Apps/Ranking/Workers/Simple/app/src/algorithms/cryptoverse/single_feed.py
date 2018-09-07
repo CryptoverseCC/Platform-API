@@ -38,7 +38,9 @@ def set_types(items):
             set_type(i)
 
 def set_type(i):
-    if tokenPattern.match(i["target"]) or addressPattern.match(i["target"]):
+    if i.get("reply_to"):
+        i["type"] = "response"
+    elif tokenPattern.match(i["target"]) or addressPattern.match(i["target"]):
         i["type"] = "boost"
     elif i.get("label") in ["github", "twitter", "instagram", "facebook"]:
         i["type"] = "social"
