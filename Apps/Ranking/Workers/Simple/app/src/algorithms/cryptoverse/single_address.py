@@ -196,5 +196,4 @@ def map_reply_item(feed_item):
         "family": feed_item["family"],
         "sequence": feed_item["sequence"],
         "created_at": feed_item["created_at"],
-        "context": feed_item["context"],
     }
