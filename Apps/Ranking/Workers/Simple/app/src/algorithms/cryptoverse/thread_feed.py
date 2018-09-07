@@ -38,7 +38,7 @@ def set_type(i):
         i["type"] = "boost"
     elif i["about"]:
         if claimPattern.match(i["about"]):
-            i["type"] = "response"
+            i["type"] = "regular"
         elif tokenPattern.match(i["about"]):
             i["type"] = "post_to"
         elif addressPattern.match(i["about"]):
