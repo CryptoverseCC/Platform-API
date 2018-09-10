@@ -88,6 +88,45 @@ RETURN
     context.id AS context
 """
 
+REPLIES_AFTER_MY_REPLY = """
+MATCH (claim:Claim)-[:ABOUT]->(aboutClaim:Claim)<-[:ABOUT]-(myClaim:Claim),
+	(aboutClaim)<-[:AUTHORED]-(aboutIdentity),
+    (package)<-[:IN]-(claim)<-[:AUTHORED]-(identity),
+    (myPackage)<-[:IN]-(myClaim)<-[:AUTHORED]-(myIdentity:Identity)
+WHERE myIdentity.id IN {ids}
+    AND NOT io.userfeeds.erc721.isValidClaim(myClaim)
+    AND NOT /*like*/ (claim)-[:TARGET]->(:Claim)
+    AND aboutIdentity <> myIdentity
+    AND identity <> myIdentity
+    AND package.timestamp > myPackage.timestamp
+MATCH
+    (claim)-[:TARGET]->(target),
+    (aboutClaim)-[:TARGET]->(aboutTarget),
+    (aboutClaim)-[:IN]->(aboutPackage)
+OPTIONAL MATCH (aboutClaim)-[:ABOUT]->(aboutAbout)
+WHERE NOT aboutAbout:Claim
+OPTIONAL MATCH (aboutClaim)-[:CONTEXT]->(aboutContext)
+WHERE io.userfeeds.erc721.isValidClaim(aboutClaim)
+OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
+WHERE io.userfeeds.erc721.isValidClaim(claim)
+RETURN
+    claim.id AS id,
+    aboutClaim.id AS about_id,
+    aboutTarget.id AS about_target,
+    aboutPackage.family AS about_family,
+    aboutPackage.sequence AS about_sequence,
+    aboutPackage.timestamp AS about_created_at,
+    aboutIdentity.id AS about_author,
+    aboutAbout.id AS about_about,
+    aboutContext.id AS about_context,
+    target.id AS target,
+    package.family AS family,
+    package.sequence AS sequence,
+    package.timestamp AS created_at,
+    identity.id AS author,
+    context.id AS context
+"""
+
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
@@ -97,7 +136,8 @@ def run(conn_mgr, input, **params):
     about_me = map_feed(fetch_feed(conn_mgr, EXPRESSIONS_ABOUT_ME_QUERY, ids))
     my_likes = map_likes(fetch_feed(conn_mgr, REACTIONS_ABOUT_ME_QUERY, ids))
     replies_to_me = map_replies(fetch_feed(conn_mgr, REPLIES_TO_ME_QUERY, ids))
-    return {"items": about_me + my_likes + replies_to_me}
+    replies_after_me = map_replies(fetch_feed(conn_mgr, REPLIES_AFTER_MY_REPLY, ids))
+    return {"items": about_me + my_likes + replies_to_me + replies_after_me}
 
 
 def fetch_feed(conn_mgr, query, ids):
@@ -161,6 +201,7 @@ def map_reply_item(feed_item):
             "sequence": feed_item["about_sequence"],
             "created_at": feed_item["about_created_at"],
             "about": feed_item["about_about"],
+            "context": feed_item.get("about_context"),
         },
         "target": feed_item["target"],
         "author": feed_item["author"],
