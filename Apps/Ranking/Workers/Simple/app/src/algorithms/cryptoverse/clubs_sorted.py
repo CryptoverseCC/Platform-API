@@ -12,29 +12,20 @@ Example:
 
 """
 
-import jsonsempai
-with jsonsempai.imports():
-    import mapping
 from algorithms.utils import materialize_records, param
-import re
 
 CLUBS_QUERY = """
 MATCH (club:Entity)<-[:ABOUT]-(claim)
-WHERE club.id IN {clubs}
-RETURN club.id AS id, count(claim) as score
+WHERE club.id STARTS WITH 'ethereum:0x' AND club.id =~ 'ethereum:0x[0-9a-f]{40}'
+RETURN club.id AS id, count(claim) AS score
 ORDER BY score DESC
 """
 
 
 @param("clubs", required=False)
 def run(conn_mgr, input, **params):
-    if "clubs" in params:
-        clubs = params["clubs"]
-    else:
-        clubs = [value.network + ":" + value.address for name, value in mapping.__dict__.items() if re.match("^[A-Z_]+$", name)]
-    if isinstance(clubs, str):
-        clubs = [clubs]
-    result = conn_mgr.run_graph(CLUBS_QUERY, {"clubs": clubs})
+    clubs = params.get("clubs", [])
+    result = conn_mgr.run_graph(CLUBS_QUERY, {})
     result = materialize_records(result)
     nonempty = [c["id"] for c in result]
     result.extend([{"id": c, "score": 0} for c in clubs if c not in nonempty])
