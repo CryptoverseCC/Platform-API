@@ -22,22 +22,6 @@ SELECT received.address as address, received.amount - COALESCE(send.amount, 0) a
     on received.address = send.address;
 """
 
-supported_assets = [
-    create_asset(mapping.BASIC_ATTENTION_TOKEN),
-    create_asset(mapping.OMNISE_GO),
-    create_asset(mapping.GOLEM),
-    create_asset(mapping.STATUS),
-    create_asset(mapping.ZRX),
-    create_asset(mapping.DECENTRALAND_MANA),
-    create_asset(mapping.CANDY),
-    create_asset(mapping.MAKER),
-    create_asset(mapping.BENTYN),
-    create_asset(mapping.DDGT),
-    create_asset(mapping.UNICORN),
-    create_asset(mapping.TOKENVILLE),
-]
-
-
 @pipeable
 @filter_debug
 @param("asset", required=True)
