@@ -16,7 +16,7 @@ OPTIONAL MATCH
     (replyClaim)-[:TARGET]->(replyTarget),
     (replyClaim)<-[:AUTHORED]-(replyAuthor),
     (replyClaim)-[:IN]->(replyPackage)
-WHERE NOT ({nocoiners} AND (replyAuthor)<-[:RECEIVER]-())
+WHERE NOT ({nocoiners} AND (replyAuthor)<-[:RECEIVER]-()) OR NOT ({coiners} AND NOT (replyAuthor)<-[:RECEIVER]-())
 WITH id, replyClaim, replyTarget, replyAuthor, replyPackage,
     CASE replyClaim
         WHEN null THEN false
@@ -40,11 +40,13 @@ RETURN
 @pipeable
 @filter_debug
 @param("nocoiners", required=False)
+@param("coiners", required=False)
 def run(conn_mgr, input, **params):
     root_messages = input["items"]
     nocoiners = not not params.get("nocoiners")
+    coiners = not not params.get("coiners")
     ids = [message["id"] for message in root_messages]
-    replies = conn_mgr.run_graph(REACTIONS, {"ids": ids, "nocoiners": nocoiners})
+    replies = conn_mgr.run_graph(REACTIONS, {"ids": ids, "nocoiners": nocoiners, "coiners": coiners})
     replies = {r["id"]: create_reply_list(r) for r in replies}
     add_replies(root_messages, replies)
     return input

@@ -15,7 +15,7 @@ OPTIONAL MATCH
     (claim)<-[:TARGET]-(reactionClaim:Claim),
     (reactionClaim)<-[:AUTHORED]-(reactionAuthor:Identity),
     (reactionClaim)-[:IN]->(reactionPackage:Package)
-WHERE NOT ({nocoiners} AND (reactionAuthor)<-[:RECEIVER]-())
+WHERE NOT ({nocoiners} AND (reactionAuthor)<-[:RECEIVER]-()) OR NOT ({coiners} AND NOT (reactionAuthor)<-[:RECEIVER]-())
 WITH id, reactionClaim, reactionAuthor, reactionPackage,
     CASE reactionClaim
         WHEN null THEN false
@@ -38,11 +38,13 @@ RETURN
 @pipeable
 @filter_debug
 @param("nocoiners", required=False)
+@param("coiners", required=False)
 def run(conn_mgr, input, **params):
     root_messages = input["items"]
     nocoiners = not not params.get("nocoiners")
+    coiners = not not params.get("coiners")
     ids = all_ids(root_messages)
-    reactions = conn_mgr.run_graph(REACTIONS, {"ids": ids, "nocoiners": nocoiners})
+    reactions = conn_mgr.run_graph(REACTIONS, {"ids": ids, "nocoiners": nocoiners, "coiners": coiners})
     reactions = {r["id"]: create_like_list(r) for r in reactions}
     add_likes(root_messages, reactions)
     return input
