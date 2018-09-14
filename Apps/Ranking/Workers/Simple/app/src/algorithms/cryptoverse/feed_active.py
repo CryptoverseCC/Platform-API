@@ -17,13 +17,7 @@ def run(conn_mgr, input, **params):
 
 def max_created_at(item):
     ret = item["created_at"]
-    for like in item["likes"]:
-        if ret < like["created_at"]:
-            ret = like["created_at"]
     for reply in item["replies"]:
         if ret < reply["created_at"]:
             ret = reply["created_at"]
-        for like in reply["likes"]:
-            if ret < like["created_at"]:
-                ret = like["created_at"]
     return ret
