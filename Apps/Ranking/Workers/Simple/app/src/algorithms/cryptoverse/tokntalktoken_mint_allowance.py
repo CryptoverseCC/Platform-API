@@ -16,4 +16,4 @@ RETURN count(active) * 100 as score
 @param("identity", required=True)
 def run(conn_mgr, input, **params):
     result = conn_mgr.run_graph(ALLOWANCE_QUERY, params)
-    return result.single()["score"]
+    return {"score": result.single()["score"]}
