@@ -27,7 +27,7 @@ from algorithms.utils import param
 
 ADDRESS_PROFILE_QUERY = """
 MATCH (social:Entity)<-[l:LABELS]-(c:Claim)<-[:AUTHORED]-(:Identity { id: {identity} }), (c)-[:IN]->(p)
-WHERE l.value IN ['facebook', 'instagram', 'twitter', 'github'] AND NOT io.userfeeds.erc721.isValidClaim(c)
+WHERE l.value IN ['facebook', 'instagram', 'twitter', 'github', 'discord', 'telegram'] AND NOT io.userfeeds.erc721.isValidClaim(c)
 RETURN social.id as social, l.value as label
 ORDER BY p.timestamp
 """
@@ -43,7 +43,7 @@ def run(conn_mgr, input, **params):
             output[item["label"]] = item["social"]
     else:
         input = context_feed.run(conn_mgr, input, id=id)
-        input = filter_labels.run(conn_mgr, input, id=["facebook", "instagram", "twitter", "github"])
+        input = filter_labels.run(conn_mgr, input, id=["facebook", "instagram", "twitter", "github", "discord", "telegram"])
         input = valid_erc721.run(conn_mgr, input)
         input = sort.run(conn_mgr, input, by="created_at")
         for claim in input["items"]:

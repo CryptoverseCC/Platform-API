@@ -42,7 +42,7 @@ def set_type(i):
         i["type"] = "response"
     elif tokenPattern.match(i["target"]) or addressPattern.match(i["target"]):
         i["type"] = "boost"
-    elif i.get("label") in ["github", "twitter", "instagram", "facebook"]:
+    elif i.get("label") in ["github", "twitter", "instagram", "facebook", "discord", "telegram"]:
         i["type"] = "social"
     elif i["about"]:
         if tokenPattern.match(i["about"]):
