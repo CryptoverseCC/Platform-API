@@ -8,9 +8,12 @@ from algorithms.utils import param
 from collections import defaultdict
 
 ROOT_AUTHOR_QUERY = """
-MATCH (rootAuthor)-[:AUTHORED]->(root:Claim { id: {id} })
+MATCH (rootAuthor)-[:AUTHORED]->(root:Claim { id: {id} })-[:IN]->(package)
 OPTIONAL MATCH (reply)-[:ABOUT]->(root)
-RETURN rootAuthor.id AS root_author, count(reply) AS replies_count
+RETURN
+    rootAuthor.id AS root_author,
+    package.timestamp AS created_at,
+    count(reply) AS replies_count
 """
 
 THREAD_AUTHORS_QUERY = """
@@ -34,6 +37,7 @@ golden_ratio = [610, 377, 233, 144, 89, 55, 34, 21, 13, 8, 5, 3, 2, 1]
 def run(conn_mgr, input, **params):
     row = conn_mgr.run_graph(ROOT_AUTHOR_QUERY, params).single()
     root_author = row["root_author"]
+    created_at = row["created_at"]
     if not row["replies_count"]:
         return {root_author: 10000000}
     result = conn_mgr.run_graph(THREAD_AUTHORS_QUERY, params)
@@ -66,7 +70,10 @@ def run(conn_mgr, input, **params):
         s2 = sum(golden_ratio[:len(r["authors"])])
         for index, a in enumerate(r["authors"]):
             author_ratio[a["id"]] += c * golden_ratio[index] / s2
-    return author_ratio
+    return {
+        "addresses": author_ratio,
+        "created_at": created_at
+    }
 
 
 def count_tokens(conn_mgr, authors):
