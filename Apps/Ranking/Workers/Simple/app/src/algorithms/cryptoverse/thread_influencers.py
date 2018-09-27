@@ -39,7 +39,10 @@ def run(conn_mgr, input, **params):
     root_author = row["root_author"]
     created_at = row["created_at"]
     if not row["replies_count"]:
-        return {root_author: 10000000}
+        return {
+            root_author: 10000000,
+            "created_at": created_at
+        }
     result = conn_mgr.run_graph(THREAD_AUTHORS_QUERY, params)
     result = [{"reply_author": x["reply_author"], "authors": set(x["authors"])} for x in result]
     authors = set()
