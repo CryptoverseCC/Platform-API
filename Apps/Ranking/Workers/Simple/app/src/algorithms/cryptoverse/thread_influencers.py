@@ -40,7 +40,9 @@ def run(conn_mgr, input, **params):
     created_at = row["created_at"]
     if not row["replies_count"]:
         return {
-            root_author: 10000000,
+            "addresses": {
+                root_author: 10000000,
+            },
             "created_at": created_at
         }
     result = conn_mgr.run_graph(THREAD_AUTHORS_QUERY, params)
