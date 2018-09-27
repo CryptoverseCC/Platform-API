@@ -10,7 +10,7 @@ ADS_QUERY = """
 MATCH
     (claim:Claim)-[:ABOUT]->(:Claim { id: {id} }),
     (claim)-[:TARGET]->(target),
-    (claim)-[:TYPE]->(:Entity { id: 'ad' }),
+    (claim)-[:TYPE]->(:Type { id: 'ad' }),
     (claim)<-[:AUTHORED]-(author),
     (claim)-[:IN]->(package),
     (claim)-[:CONNECTED_WITH]->(sent)-[:RECEIVER]->(contract:Identity { id: '0x53b7c52090750c30a40babd50024588e527292c3' })
@@ -29,7 +29,7 @@ RETURN
 BOOST_QUERY = """
 MATCH
     (claim:Claim)-[:TARGET]->(ad)-[:ABOUT]->(:Claim { id: {id} }),
-    (claim)-[:TYPE]->(:Entity { id: 'boost' }),
+    (claim)-[:TYPE]->(:Type { id: 'boost' }),
     (claim)-[:CONNECTED_WITH]->(sent)-[:RECEIVER]->(contract:Identity { id: '0x53b7c52090750c30a40babd50024588e527292c3' })
 OPTIONAL MATCH (claim)-[:CONNECTED_WITH]->(returned)-[:RECEIVER]->(forwarder { id: '0xfcd0b4035f0d4f97d171a28d8256842fedfdcdeb' }), (returned)-[:SENDER]->(contract)
 RETURN

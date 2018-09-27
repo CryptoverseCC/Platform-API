@@ -8,7 +8,7 @@ Version: 0.1.0
 
 from algorithms.utils import pipeable, filter_debug, param
 
-REACTIONS = """
+REPLIES = """
 UNWIND {ids} as id
 MATCH (claim:Claim { id: id })
 OPTIONAL MATCH
@@ -16,7 +16,8 @@ OPTIONAL MATCH
     (replyClaim)-[:TARGET]->(replyTarget),
     (replyClaim)<-[:AUTHORED]-(replyAuthor),
     (replyClaim)-[:IN]->(replyPackage)
-WHERE NOT ({nocoiners} AND (replyAuthor)<-[:RECEIVER]-()) OR NOT ({coiners} AND NOT (replyAuthor)<-[:RECEIVER]-())
+WHERE NOT (replyClaim)-[:TYPE]->(:Type { id: 'ad' })
+    AND (NOT ({nocoiners} AND (replyAuthor)<-[:RECEIVER]-()) OR NOT ({coiners} AND NOT (replyAuthor)<-[:RECEIVER]-()))
 WITH id, replyClaim, replyTarget, replyAuthor, replyPackage,
     CASE replyClaim
         WHEN null THEN false
@@ -46,7 +47,7 @@ def run(conn_mgr, input, **params):
     nocoiners = not not params.get("nocoiners")
     coiners = not not params.get("coiners")
     ids = [message["id"] for message in root_messages]
-    replies = conn_mgr.run_graph(REACTIONS, {"ids": ids, "nocoiners": nocoiners, "coiners": coiners})
+    replies = conn_mgr.run_graph(REPLIES, {"ids": ids, "nocoiners": nocoiners, "coiners": coiners})
     replies = {r["id"]: create_reply_list(r) for r in replies}
     add_replies(root_messages, replies)
     return input
