@@ -1,12 +1,6 @@
 """
-Cryptoverse feed with replies and likes
-=======================================
-
-Version: 0.1.0
-
-Example:
-
-`ranking/cryptoverse_feed <https://api.userfeeds.io/ranking/cryptoverse_feed>`_
+Cryptoverse feed with replies, likes and ads
+============================================
 
 """
 
