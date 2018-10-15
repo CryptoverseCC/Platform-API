@@ -24,7 +24,7 @@ OPTIONAL MATCH (claim)-[:ABOUT]->(about)
 OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
 RETURN
     claim.id AS id,
-    target.id AS title,
+    target.id AS target,
     claim.content AS content,
     claim.filters AS filters,
     package.family AS family,
@@ -55,6 +55,7 @@ def map_feed_item(feed_item):
     return {
         "id": feed_item["id"],
         "target": feed_item["target"],
+        "content": feed_item["content"],
         "author": feed_item["author"],
         "family": feed_item["family"],
         "sequence": feed_item["sequence"],
