@@ -14,7 +14,7 @@ Example:
 
 ROOT_QUERY = """
 MATCH (claim:Claim)-[:TYPE]->(type:Type)
-WHERE type.name = "post"
+WHERE type.id = "post"
 WITH claim
 MATCH
     (claim)-[:TARGET]->(target),
@@ -24,7 +24,9 @@ OPTIONAL MATCH (claim)-[:ABOUT]->(about)
 OPTIONAL MATCH (claim)-[:CONTEXT]->(context)
 RETURN
     claim.id AS id,
-    target.id AS target,
+    target.id AS title,
+    claim.content AS content,
+    claim.filters AS filters,
     package.family AS family,
     package.sequence AS sequence,
     package.timestamp AS created_at,
