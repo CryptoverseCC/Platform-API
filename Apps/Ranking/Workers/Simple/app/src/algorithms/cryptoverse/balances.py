@@ -31,7 +31,7 @@ def run(conn_mgr, input, **params):
         erc721, token_id = entity.rsplit(":", 1)
         results = conn_mgr.run_graph(IDENTITY_FROM_CONTEXT, {"erc721": erc721, "tokenId": token_id})
         entity = results.single()["identity"]
-    results = conn_mgr.run_graph(ALL_BALANCES, params)
+    results = conn_mgr.run_graph(ALL_BALANCES, {"entity": entity})
     balances = defaultdict(int)
     for r in results:
         balances[r["asset"]] += int(float(r["amount"]))
