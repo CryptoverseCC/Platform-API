@@ -86,5 +86,4 @@ def getData(conn_mgr, asset):
 @param("id", required=True)
 def run(conn_mgr, input, **params):
     ids = type(params['id']) == list and params['id'] or [params['id']]
-    items = [getData(conn_mgr, asset) for asset in ids]
-    return items
+    return {asset: getData(conn_mgr, asset) for asset in ids}
