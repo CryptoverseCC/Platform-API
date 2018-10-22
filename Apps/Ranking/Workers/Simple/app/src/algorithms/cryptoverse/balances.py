@@ -26,10 +26,11 @@ LIMIT 1
 
 @param("entity", required=True)
 def run(conn_mgr, input, **params):
-    if not addressPattern.match(params["entity"]):
-        erc721, token_id = params["entity"].rsplit(":", 1)
+    entity = params["entity"].lower()
+    if not addressPattern.match(entity):
+        erc721, token_id = entity.rsplit(":", 1)
         results = conn_mgr.run_graph(IDENTITY_FROM_CONTEXT, {"erc721": erc721, "tokenId": token_id})
-        params["entity"] = results.single()["identity"]
+        entity = results.single()["identity"]
     results = conn_mgr.run_graph(ALL_BALANCES, params)
     balances = defaultdict(int)
     for r in results:
