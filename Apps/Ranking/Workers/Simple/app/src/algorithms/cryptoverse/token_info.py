@@ -13,6 +13,7 @@ Example:
 """
 
 from algorithms.utils import param
+from web3 import Web3
 from cachetools.func import lfu_cache
 
 ABI = [
@@ -83,6 +84,7 @@ def getData(conn_mgr, asset, address):
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    contracts = [(asset, asset.split(':')[1]) for asset in params["id"]]
+    ids = params['id'] and type(params['id']) == list or [params['id']]
+    contracts = [(asset, Web3.toChecksumAddress(asset.split(':')[1])) for asset in ids]
     items = [getData(conn_mgr, *asset_info) for asset_info in contracts]
     return items
