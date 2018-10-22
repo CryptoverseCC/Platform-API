@@ -9,11 +9,14 @@ from retry import retry
 import psycopg2
 from psycopg2.extras import DictCursor
 from algorithms.utils import materialize_records
+from web3 import Web3, HTTPProvider
 
 DB_GRAPH_USER, DB_GRAPH_PASS = os.environ["NEO4J_AUTH"].split('/')
 NEO_HOST = os.environ["NEO4J_HOST"]
 POSTGRES_USER, POSTGRES_PASS = os.environ["POSTGRES_AUTH"].split('/')
 POSTGRES_HOST = os.environ["POSTGRES_HOST"]
+ETHEREUM_HOST = os.environ["ETHEREUM_HOST"]
+ETHEREUM_PORT = os.environ["ETHEREUM_PORT"]
 
 
 class ConnectionManager:
@@ -21,6 +24,7 @@ class ConnectionManager:
     def __init__(self):
         self.connect_graph()
         self.connect_sql()
+        self.connect_eth()
 
     @retry(tries=5, delay=5)
     def connect_graph(self):
@@ -35,6 +39,12 @@ class ConnectionManager:
         self.sql_conn = psycopg2.connect(host=POSTGRES_HOST, dbname="postgres", user=POSTGRES_USER,
                                          password=POSTGRES_PASS)
         logging.info("Connected to PostgreSQL")
+
+    @retry(tries=5, delay=5)
+    def connect_eth(self):
+        logging.info("Connecting to Ethereum node...")
+        self.web3 = Web3(HTTPProvider(f"http://{ETHEREUM_HOST}:{ETHEREUM_PORT}"))
+        logging.info("Connected to Ethereum node")
 
     def get_latest_package(self, family):
         family_url_map = {
@@ -62,6 +72,10 @@ class ConnectionManager:
         except psycopg2.Error as e:
             self.sql_conn.reset()
             raise e
+
+    def run_eth(self, address, abi, method, params=None):
+        contract = self.web3.eth.contract(address=address, abi=abi)
+        return contract.functions[method](**(params or {})).call()
 
     @staticmethod
     def run_graph_query(tx, query, params):

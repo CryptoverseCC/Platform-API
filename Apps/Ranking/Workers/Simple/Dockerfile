@@ -11,6 +11,8 @@ RUN pip install retry
 RUN pip install PyFunctional
 RUN pip install --no-cache-dir flask-cors && rm -rf /root/.cache
 RUN pip install json-sempai
+RUN pip install web3
+RUN pip install cachetools
 
 COPY app /app
 
