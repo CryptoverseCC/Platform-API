@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from gevent import monkey; monkey.patch_all()
+from gevent import pywsgi
 import logging.config; logging.config.fileConfig('/app/logging.conf')
 from flask import Flask, request
 from flask import jsonify
@@ -60,3 +62,6 @@ def run(flow):
         logging.info("Exception occurred while processing flow {}".format(flow))
         logging.exception(e)
         return jsonify(error=str(e)), 400
+
+server = pywsgi.WSGIServer(('0.0.0.0', 8000), app)
+server.serve_forever()

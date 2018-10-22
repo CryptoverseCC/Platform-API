@@ -5,6 +5,7 @@ RUN apk add --no-cache curl
 
 EXPOSE 8000
 
+RUN pip install gevent
 RUN pip install psycopg2
 RUN pip install neo4j-driver
 RUN pip install retry
@@ -20,4 +21,4 @@ WORKDIR /app/src/
 RUN curl https://raw.githubusercontent.com/CryptoverseCC/contract-mapping/master/mapping.json > mapping.json
 RUN python3 tests
 
-CMD /usr/local/bin/gunicorn --log-config /app/logging.conf -w 16 -b :8000 start:app
+CMD python /app/src/start.py

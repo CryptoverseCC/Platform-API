@@ -63,7 +63,8 @@ ABI = [
 
 
 @lfu_cache(maxsize=2048)
-def getData(conn_mgr, asset, address):
+def getData(conn_mgr, asset):
+    address = Web3.toChecksumAddress(asset.split(':')[1])
     try:
         data = {
             "asset": asset,
@@ -84,7 +85,6 @@ def getData(conn_mgr, asset, address):
 
 @param("id", required=True)
 def run(conn_mgr, input, **params):
-    ids = params['id'] and type(params['id']) == list or [params['id']]
-    contracts = [(asset, Web3.toChecksumAddress(asset.split(':')[1])) for asset in ids]
-    items = [getData(conn_mgr, *asset_info) for asset_info in contracts]
+    ids = type(params['id']) == list and params['id'] or [params['id']]
+    items = [getData(conn_mgr, asset) for asset in ids]
     return items
