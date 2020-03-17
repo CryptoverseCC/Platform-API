@@ -2,9 +2,13 @@
 Credits
 =======
 
-Version: 0.1.0
+Returns list of credits value that were present in claim.credits along with number of time they were there. For a given `type` parameter
+
+
+Version: 0.2.0
 
 """
+from algorithms.utils import param
 
 CLAIMS_WITH_CREDITS = """
 MATCH 
@@ -12,36 +16,24 @@ MATCH
     (c)-[:TARGET]->(target:Entity),
     (c)-[credit:GIVES_CREDITS]->(e:Entity),
     (c)<-[:AUTHORED]-(author:Identity)
+WHERE
+    credit.type = {type}
 RETURN
-    c.id as id,
-    target.id as target,
-    author.id as author,
-    p.family AS family,
-    p.sequence AS sequence,
-    p.timestamp AS created_at,
-    credit.type AS credit_type,
-    e.id AS credit_value
+    distinct(e.id) AS value,
+    count(e) as score
 """
+
 
 def map_item(item):
     return {
-        "id": item["id"],
-        "target": item["target"],
-        "author": item["author"],
-        "family": item["family"],
-        "sequence": item["sequence"],
-        "created_at": item["created_at"],
-        "credit_type": item["credit_type"],
-        "credit_value": item["credit_value"],
+        "value": item["value"],
+        "score": item["score"],
     }
 
-def map_items(query_result):
-    return [map_item(item) for item in query_result]
 
-def sorted_by_created_at(query_result):
-    return sorted(query_result, key=lambda x: x["created_at"], reverse=True)
-
+@param("type", required=True)
 def run(conn_mgr, input, **params):
-    query_result = conn_mgr.run_graph(CLAIMS_WITH_CREDITS, params)
-    mapped_items = map_items(query_result)
-    return {"items": sorted_by_created_at(mapped_items)}
+    items = conn_mgr.run_graph(CLAIMS_WITH_CREDITS, params)
+    items = [map_item(item) for item in items]
+    items = sorted(items, key=lambda x: x["score"], reverse=True)
+    return {"items": items}
